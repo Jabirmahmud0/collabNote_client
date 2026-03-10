@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, Search, Grid3x3, List, Filter } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useNotes } from '../hooks/useNotes';
+import { useSocket } from '../hooks/useSocket';
 import Sidebar from '../components/layout/Sidebar';
 import Topbar from '../components/layout/Topbar';
 import NoteList from '../components/notes/NoteList';
@@ -15,7 +16,8 @@ import toast from 'react-hot-toast';
 const DashboardPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { notes, tags, loading, fetchNotes, createNote, deleteNote, permanentDelete, restoreNote } = useNotes();
+  const { notes, tags, loading, fetchNotes, createNote, deleteNote, permanentDelete, restoreNote, shareNote } = useNotes();
+  const { onNoteShared, onInviteResponse } = useSocket();
 
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,18 +29,43 @@ const DashboardPage = () => {
   const [sharePermission, setSharePermission] = useState('edit');
   const [newNoteTitle, setNewNoteTitle] = useState('');
 
-  // Auto-refresh notes every 30 seconds to catch shared notes
+  // Fetch notes on mount and whenever filter or tag changes
   useEffect(() => {
-    const interval = setInterval(() => {
-      loadNotes();
-    }, 30000);
-    
-    return () => clearInterval(interval);
+    fetchNotes({ filter, tag: selectedTag });
   }, [filter, selectedTag]);
 
+
+
+  // Real-time: refresh when someone shares a note with us
+  useEffect(() => {
+    const unsubscribe = onNoteShared(({ note }) => {
+      // toast.success(`"${note?.title || 'A note'}" was shared with you!`); // Now handled by NotificationCenter
+      fetchNotes({ filter: 'all', tag: null, force: true });
+      if (filter !== 'all') {
+        fetchNotes({ filter, tag: selectedTag, force: true });
+      }
+    });
+    return unsubscribe;
+  }, [onNoteShared, filter, selectedTag]);
+
+  // Real-time: refresh when someone accepts our invite
+  useEffect(() => {
+    const unsubscribe = onInviteResponse((response) => {
+      if (response.action === 'accept') {
+        toast.success(`${response.userName} accepted your invitation!`);
+        // Refresh notes to show updated collaborator list
+        fetchNotes({ filter, tag: selectedTag, force: true });
+      }
+    });
+    return unsubscribe;
+  }, [onInviteResponse, filter, selectedTag, fetchNotes]);
+
   const loadNotes = async () => {
-    try { await fetchNotes({ filter, tag: selectedTag }); }
-    catch (error) { console.error('Failed to load notes:', error); }
+    try {
+      await fetchNotes({ filter, tag: selectedTag, force: true });
+    } catch (error) {
+      console.error('Failed to load notes:', error);
+    }
   };
 
   const handleCreateNote = () => setShowCreateModal(true);
@@ -104,11 +131,13 @@ const DashboardPage = () => {
     }
   };
 
-  const filteredNotes = notes.filter((note) => {
-    if (!searchQuery) return true;
-    const q = searchQuery.toLowerCase();
-    return note.title?.toLowerCase().includes(q) || note.excerpt?.toLowerCase().includes(q);
-  });
+  const filteredNotes = useMemo(() => {
+    return notes.filter((note) => {
+      if (!searchQuery) return true;
+      const q = searchQuery.toLowerCase();
+      return note.title?.toLowerCase().includes(q) || note.excerpt?.toLowerCase().includes(q);
+    });
+  }, [notes, searchQuery]);
 
   const filterLabels = { 
     all: 'All Notes', 

@@ -13,7 +13,7 @@ const FloatingThemeToggle = () => {
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
       onClick={toggleTheme}
-      className="fixed bottom-8 right-8 z-50 p-3.5 rounded-full bg-bg-secondary/70 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] backdrop-blur-xl text-text-primary hover:text-accent hover:border-accent/40 transition-colors group"
+      className="fixed bottom-8 right-8 z-50 p-3.5 rounded-full bg-bg-secondary/70 border border-border shadow-[0_8px_32px_rgba(0,0,0,0.5)] backdrop-blur-xl text-text-primary hover:text-accent hover:border-accent/40 transition-colors group"
       aria-label="Toggle theme"
     >
       <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-accent/0 to-accent/0 group-hover:from-accent/10 group-hover:to-accent-secondary/10 transition-colors" />

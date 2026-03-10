@@ -19,7 +19,7 @@ const UserMenu = () => {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 p-1 rounded-lg hover:bg-white/5 transition-all active:scale-[0.95]"
+        className="flex items-center gap-2 p-1 rounded-lg hover:bg-border transition-all active:scale-[0.95]"
       >
         <Avatar src={user?.avatar} name={user?.name} size="sm" />
       </button>
@@ -44,14 +44,14 @@ const UserMenu = () => {
               <div className="p-1.5">
                 <button
                   onClick={() => { navigate('/profile'); setIsOpen(false); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-white/5 rounded-lg transition-all"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-border rounded-lg transition-all"
                 >
                   <User className="w-4 h-4" />
                   Profile
                 </button>
                 <button
                   onClick={() => { navigate('/profile'); setIsOpen(false); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-white/5 rounded-lg transition-all"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-border rounded-lg transition-all"
                 >
                   <Settings className="w-4 h-4" />
                   Settings

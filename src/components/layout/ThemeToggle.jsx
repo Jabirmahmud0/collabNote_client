@@ -9,7 +9,7 @@ const ThemeToggle = () => {
   return (
     <button
       onClick={toggleTheme}
-      className="relative p-2 rounded-lg hover:bg-white/5 text-text-muted hover:text-text-primary transition-all"
+      className="relative p-2 rounded-lg hover:bg-border text-text-muted hover:text-text-primary transition-all"
       aria-label="Toggle theme"
     >
       <motion.div

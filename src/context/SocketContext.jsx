@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from '../hooks/useAuth';
 
@@ -29,7 +29,7 @@ export const SocketProvider = ({ children }) => {
     }
 
     const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
-    
+
     const newSocket = io(socketUrl, {
       transports: ['websocket', 'polling'],
       secure: window.location.protocol === 'https:',
@@ -38,11 +38,20 @@ export const SocketProvider = ({ children }) => {
     newSocket.on('connect', () => {
       console.log('Socket connected:', newSocket.id);
       setConnected(true);
+
+      // Register this user globally so server can send us targeted events
+      // (e.g., note-shared notifications)
+      console.log('[SOCKET] Registering user:', user.id);
+      newSocket.emit('register-user', { userId: user.id });
     });
 
     newSocket.on('disconnect', () => {
       console.log('Socket disconnected');
       setConnected(false);
+    });
+
+    newSocket.on('new-notification', (notification) => {
+      console.log('[SOCKET] Received new-notification event:', notification);
     });
 
     newSocket.on('room-users', (users) => {
@@ -52,7 +61,7 @@ export const SocketProvider = ({ children }) => {
     newSocket.on('user-joined', ({ userId, userName, color }) => {
       console.log(`${userName} joined`);
       setUsers((prev) => [
-        ...prev,
+        ...prev.filter((u) => u.userId !== userId), // avoid duplicates
         { userId, userName, color },
       ]);
     });
@@ -129,6 +138,38 @@ export const SocketProvider = ({ children }) => {
     });
   };
 
+  /**
+   * Listen for real-time notifications
+   */
+  const onNotification = useCallback((callback) => {
+    if (!socket) return () => {};
+    socket.on('new-notification', callback);
+    return () => socket.off('new-notification', callback);
+  }, [socket]);
+
+  /**
+   * Listen for response to our invitations
+   */
+  const onInviteResponse = useCallback((callback) => {
+    if (!socket) return () => {};
+    socket.on('invite-response', callback);
+    return () => socket.off('invite-response', callback);
+  }, [socket]);
+
+  /**
+   * Subscribe to note-shared events.
+   * The callback will receive { note } when the current user is added as a collaborator.
+   * Returns an unsubscribe function.
+   */
+  const onNoteShared = useCallback(
+    (callback) => {
+      if (!socket) return () => {};
+      socket.on('note-shared', callback);
+      return () => socket.off('note-shared', callback);
+    },
+    [socket]
+  );
+
   const value = {
     socket,
     connected,
@@ -139,6 +180,9 @@ export const SocketProvider = ({ children }) => {
     sendCursorMove,
     sendTyping,
     sendStopTyping,
+    onNoteShared,
+    onNotification,
+    onInviteResponse,
   };
 
   return (

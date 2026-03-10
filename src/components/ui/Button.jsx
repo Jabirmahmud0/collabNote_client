@@ -18,8 +18,8 @@ const Button = ({
     secondary: 'bg-bg-tertiary hover:bg-bg-elevated text-text-primary rounded-xl border border-border hover:border-border-hover active:scale-[0.97] shadow-sm',
     outline: 'bg-transparent border border-border text-text-secondary hover:text-text-primary hover:border-accent hover:bg-accent-light rounded-xl active:scale-[0.97]',
     danger: 'bg-danger/10 text-danger hover:bg-danger hover:text-white border border-danger/20 hover:border-danger rounded-xl active:scale-[0.97] transition-colors',
-    glass: 'glass hover:bg-white/5 text-text-primary rounded-xl active:scale-[0.97]',
-    ghost: 'bg-transparent text-text-secondary hover:text-text-primary hover:bg-white/5 rounded-xl active:scale-[0.97]',
+    glass: 'glass hover:bg-border text-text-primary rounded-xl active:scale-[0.97]',
+    ghost: 'bg-transparent text-text-secondary hover:text-text-primary hover:bg-border rounded-xl active:scale-[0.97]',
   };
 
   const sizes = {

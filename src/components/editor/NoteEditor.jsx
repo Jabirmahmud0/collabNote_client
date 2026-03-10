@@ -59,7 +59,9 @@ const NoteEditor = forwardRef(({ content, onChange, onSelectionChange, readOnly 
 
   return (
     <div className="h-full flex flex-col relative">
-      <div className="relative flex-1 flex flex-col">
+      {/* The outer wrapper must be position:relative so the CursorOverlay's
+          absolute inset-0 is correctly bounded to the editor area */}
+      <div className="relative flex-1 flex flex-col" style={{ position: 'relative' }}>
         <ReactQuill
           ref={quillRef}
           theme="snow"
@@ -72,7 +74,7 @@ const NoteEditor = forwardRef(({ content, onChange, onSelectionChange, readOnly 
           className="flex-1"
           style={{ flex: 1 }}
         />
-        {/* Cursor Overlay */}
+        {/* CursorOverlay sits over the entire editor area */}
         <CursorOverlay quillRef={quillRef} users={users || []} />
       </div>
       
@@ -93,8 +95,8 @@ const NoteEditor = forwardRef(({ content, onChange, onSelectionChange, readOnly 
         }
         .quill .ql-toolbar {
           border: none !important;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-          background: rgba(15, 23, 42, 0.8) !important;
+          border-bottom: 1px solid var(--border) !important;
+          background: var(--bg-tertiary) !important;
           backdrop-filter: blur(8px);
           position: sticky;
           top: 0;
@@ -144,13 +146,13 @@ const NoteEditor = forwardRef(({ content, onChange, onSelectionChange, readOnly 
         }
         
         .ql-snow .ql-stroke {
-          stroke: rgba(255, 255, 255, 0.5) !important;
+          stroke: var(--text-muted) !important;
         }
         .ql-snow .ql-fill {
-          fill: rgba(255, 255, 255, 0.5) !important;
+          fill: var(--text-muted) !important;
         }
         .ql-snow .ql-picker {
-            color: rgba(255, 255, 255, 0.5) !important;
+            color: var(--text-muted) !important;
         }
         
         /* Headings and Typography */

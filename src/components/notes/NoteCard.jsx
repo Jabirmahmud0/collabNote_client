@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { MoreVertical, Edit2, Trash2, Share2, Clock, FileText, Users, AlertTriangle } from 'lucide-react';
+import { MoreVertical, Edit2, Trash2, Share2, Clock, Users, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Avatar from '../ui/Avatar';
 
@@ -8,65 +8,41 @@ const NoteCard = ({ note, onClick, onEdit, onShare, onDelete }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Get excerpt from backend or generate from content
-  const excerpt = (() => {
-    // First try backend excerpt
-    if (note.excerpt && note.excerpt.trim()) return note.excerpt;
-    
+  // Memoize excerpt calculation
+  const excerpt = useMemo(() => {
+    // Use backend excerpt if available
+    if (note.excerpt !== undefined && note.excerpt !== null) {
+      return note.excerpt || 'No content yet...';
+    }
+
     // Fallback: generate from content
     if (!note.content) return 'No content yet...';
-    
-    // If content is HTML string, strip tags
-    if (typeof note.content === 'string') {
-      const text = note.content
-        .replace(/<[^>]*>/g, ' ') // Remove HTML tags
-        .replace(/&nbsp;/g, ' ')   // Convert &nbsp; to space
-        .replace(/\s+/g, ' ')      // Normalize whitespace
-        .trim()
-        .slice(0, 120);
-      return text || 'Empty note';
-    }
-    
-    // Handle Delta object format
-    const ops = note.content.ops || note.content;
-    
-    if (!Array.isArray(ops)) return 'No content yet...';
-    
-    const text = ops
-      .filter((op) => op && typeof op.insert === 'string')
-      .map((op) => op.insert)
-      .join(' ')
-      .slice(0, 120);
-    return text.trim() || 'Empty note';
-  })();
 
-  // Calculate word count
-  const wordCount = (() => {
-    if (!note.content) return 0;
-    
-    // If content is HTML string, strip tags and count
+    // If content is HTML string, strip tags
     if (typeof note.content === 'string') {
       const text = note.content
         .replace(/<[^>]*>/g, ' ')
         .replace(/&nbsp;/g, ' ')
         .replace(/\s+/g, ' ')
-        .trim();
-      return text ? text.split(/\s+/).filter(w => w).length : 0;
+        .trim()
+        .slice(0, 150);
+      return text || 'Empty note';
     }
-    
+
     // Handle Delta object format
-    const ops = note.content.ops || note.content;
-    
-    if (!Array.isArray(ops)) return 0;
-    
+    const ops = note.content?.ops || note.content;
+
+    if (!Array.isArray(ops)) return 'No content yet...';
+
     const text = ops
       .filter((op) => op && typeof op.insert === 'string')
       .map((op) => op.insert)
-      .join(' ');
-    return text.trim().split(/\s+/).filter(w => w).length;
-  })();
+      .join(' ')
+      .slice(0, 150);
+    return text.trim() || 'Empty note';
+  }, [note.excerpt, note.content]);
 
-  const collaborators = note.collaborators || [];
+  const collaborators = (note.collaborators || []).filter(c => c.status === 'accepted');
   const tags = note.tags || [];
   const hasTitle = note.title && note.title.trim() !== '' && note.title !== 'Untitled';
 
@@ -116,7 +92,7 @@ const NoteCard = ({ note, onClick, onEdit, onShare, onDelete }) => {
             <div className="relative shrink-0">
               <button
                 onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
-                className="p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-white/5 transition-all opacity-0 group-hover:opacity-100"
+                className="p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-border transition-all opacity-0 group-hover:opacity-100"
               >
                 <MoreVertical className="w-4 h-4" />
               </button>
@@ -133,14 +109,14 @@ const NoteCard = ({ note, onClick, onEdit, onShare, onDelete }) => {
                     >
                       <button
                         onClick={(e) => { e.stopPropagation(); onEdit(note._id); setShowMenu(false); }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors"
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-border transition-colors"
                       >
                         <Edit2 className="w-4 h-4" />
                         Edit Note
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); onShare(note._id); setShowMenu(false); }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors"
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-border transition-colors"
                       >
                         <Share2 className="w-4 h-4" />
                         Share
@@ -182,24 +158,18 @@ const NoteCard = ({ note, onClick, onEdit, onShare, onDelete }) => {
 
         {/* Footer */}
         <div className="px-5 py-3 bg-bg-tertiary/50 border-t border-border flex items-center justify-between">
-          {/* Word Count */}
-          <div className="flex items-center gap-1.5 text-xs text-text-muted">
-            <FileText className="w-3.5 h-3.5" />
-            <span>{wordCount} words</span>
-          </div>
-
           {/* Collaborators */}
-          {collaborators.length > 0 && (
+          {collaborators.length > 0 ? (
             <div className="flex items-center gap-2">
               <Users className="w-3.5 h-3.5 text-text-muted" />
               <div className="flex -space-x-1.5">
                 {collaborators.slice(0, 3).map((collab) => (
-                  <Avatar 
-                    key={collab.user._id} 
-                    src={collab.user.avatar} 
-                    name={collab.user.name} 
-                    size="xs" 
-                    className="w-5 h-5 text-[8px] border border-bg-secondary" 
+                  <Avatar
+                    key={collab.user._id}
+                    src={collab.user.avatar}
+                    name={collab.user.name}
+                    size="xs"
+                    className="w-5 h-5 text-[8px] border border-bg-secondary"
                   />
                 ))}
                 {collaborators.length > 3 && (
@@ -212,6 +182,8 @@ const NoteCard = ({ note, onClick, onEdit, onShare, onDelete }) => {
                 {collaborators.length} {collaborators.length === 1 ? 'collaborator' : 'collaborators'}
               </span>
             </div>
+          ) : (
+            <span className="text-[10px] text-text-muted">Private note</span>
           )}
         </div>
       </motion.div>

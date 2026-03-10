@@ -109,7 +109,7 @@ const EditorPage = () => {
   const handleTitleChange = useCallback((t) => setTitle(t), []);
 
   const handleSelectionChange = useCallback((range, source) => {
-    if (source === 'user' && range && socket) {
+    if (source === 'user' && socket) {
       sendCursorMove(id, range);
     }
   }, [id, socket, sendCursorMove]);

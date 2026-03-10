@@ -49,7 +49,7 @@ const Sidebar = ({
           )}
         </Link>
         {!collapsed && (
-          <button onClick={() => setCollapsed(true)} className="p-1.5 rounded-lg hover:bg-white/5 text-text-muted hover:text-text-primary transition-colors">
+          <button onClick={() => setCollapsed(true)} className="p-1.5 rounded-lg hover:bg-border text-text-muted hover:text-text-primary transition-colors">
             <PanelLeftClose className="w-4 h-4" />
           </button>
         )}
@@ -57,7 +57,7 @@ const Sidebar = ({
 
       {/* Expand button when collapsed */}
       {collapsed && (
-        <button onClick={() => setCollapsed(false)} className="mx-auto mt-3 p-2 rounded-lg hover:bg-white/5 text-text-muted hover:text-text-primary transition-colors">
+        <button onClick={() => setCollapsed(false)} className="mx-auto mt-3 p-2 rounded-lg hover:bg-border text-text-muted hover:text-text-primary transition-colors">
           <PanelLeft className="w-4 h-4" />
         </button>
       )}
@@ -87,7 +87,7 @@ const Sidebar = ({
               className={`w-full flex items-center ${collapsed ? 'justify-center' : ''} gap-3 ${collapsed ? 'p-2.5' : 'px-3 py-2'} rounded-xl text-[13px] font-medium transition-all duration-200 ${
                 isActive
                   ? 'bg-accent/10 text-accent border border-accent/15'
-                  : 'text-text-secondary hover:text-text-primary hover:bg-white/5 border border-transparent'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-border border border-transparent'
               }`}
               title={collapsed ? item.label : undefined}
             >
@@ -130,7 +130,7 @@ const Sidebar = ({
                       className={`w-full text-left text-[13px] py-1.5 px-3 rounded-lg transition-all font-medium flex items-center gap-2 ${
                         selectedTag === tag
                           ? 'text-accent bg-accent/5'
-                          : 'text-text-muted hover:text-text-primary hover:bg-white/5'
+                          : 'text-text-muted hover:text-text-primary hover:bg-border'
                       }`}
                     >
                       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${selectedTag === tag ? 'bg-accent' : 'bg-text-muted/30'}`} />
@@ -156,7 +156,7 @@ const Sidebar = ({
             className={`flex items-center ${collapsed ? 'justify-center' : ''} gap-3 ${collapsed ? 'p-2.5' : 'px-3 py-2'} rounded-xl text-[13px] font-medium transition-all ${
               location.pathname === to
                 ? 'bg-accent/10 text-accent border border-accent/15'
-                : 'text-text-secondary hover:text-text-primary hover:bg-white/5 border border-transparent'
+                : 'text-text-secondary hover:text-text-primary hover:bg-border border border-transparent'
             }`}
             title={collapsed ? label : undefined}
           >

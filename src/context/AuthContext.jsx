@@ -67,8 +67,14 @@ export const AuthProvider = ({ children }) => {
       
       localStorage.setItem('accessToken', accessToken);
       
-      // Re-check auth with new token
-      await checkAuth();
+      // Update user state directly with new token info
+      const decoded = JSON.parse(atob(accessToken.split('.')[1]));
+      setUser({
+        id: decoded.id,
+        name: localStorage.getItem('userName') || '',
+        email: localStorage.getItem('userEmail') || '',
+        avatar: localStorage.getItem('userAvatar') || '',
+      });
     } catch (error) {
       console.error('Token refresh failed:', error);
       localStorage.removeItem('accessToken');
@@ -87,9 +93,10 @@ export const AuthProvider = ({ children }) => {
       password,
     });
 
-    const { user, accessToken } = response.data.data;
+    const { user, accessToken, refreshToken } = response.data.data;
 
     localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
     localStorage.setItem('userName', user.name);
     localStorage.setItem('userEmail', user.email);
     localStorage.setItem('userAvatar', user.avatar || '');
@@ -107,9 +114,10 @@ export const AuthProvider = ({ children }) => {
       password,
     });
 
-    const { user, accessToken } = response.data.data;
+    const { user, accessToken, refreshToken } = response.data.data;
 
     localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
     localStorage.setItem('userName', user.name);
     localStorage.setItem('userEmail', user.email);
     localStorage.setItem('userAvatar', user.avatar || '');
@@ -129,9 +137,10 @@ export const AuthProvider = ({ children }) => {
       avatar
     });
 
-    const { user: authUser, accessToken } = response.data.data;
+    const { user: authUser, accessToken, refreshToken } = response.data.data;
 
     localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
     localStorage.setItem('userName', authUser.name);
     localStorage.setItem('userEmail', authUser.email);
     localStorage.setItem('userAvatar', authUser.avatar || '');

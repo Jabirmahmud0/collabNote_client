@@ -3,6 +3,7 @@ import { Search, Plus, Bell } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import ThemeToggle from './ThemeToggle';
 import UserMenu from './UserMenu';
+import NotificationCenter from './NotificationCenter';
 
 const Topbar = ({ searchQuery, onSearchChange, onCreateNote }) => {
   const { user } = useAuth();
@@ -36,10 +37,7 @@ const Topbar = ({ searchQuery, onSearchChange, onCreateNote }) => {
 
         <div className="w-px h-5 bg-border mx-1" />
 
-        <button className="p-2 rounded-lg hover:bg-white/5 text-text-muted hover:text-text-primary transition-all relative">
-          <Bell className="w-4 h-4" />
-          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-accent rounded-full" />
-        </button>
+        <NotificationCenter />
 
         <ThemeToggle />
 

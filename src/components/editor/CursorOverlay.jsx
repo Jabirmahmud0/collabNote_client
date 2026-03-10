@@ -1,68 +1,91 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useSocketContext } from '../../context/SocketContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
+/**
+ * A single remote user's cursor.
+ */
 const LiveCursor = ({ user, quillEditor }) => {
-  const [position, setPosition] = useState({ x: 0, y: 0, visible: false });
+  const [pos, setPos] = useState(null);
 
   useEffect(() => {
     if (!user.range || !quillEditor) {
-      setPosition(prev => ({ ...prev, visible: false }));
+      setPos(null);
       return;
     }
 
-    try {
-      const bounds = quillEditor.getBounds(user.range.index, user.range.length);
-      if (bounds) {
-        setPosition({
-          x: bounds.left,
-          y: bounds.top,
-          visible: true,
-        });
+    const updatePosition = () => {
+      try {
+        // getBounds returns coordinates relative to the editor container
+        const bounds = quillEditor.getBounds(user.range.index, user.range.length);
+        if (bounds) {
+          setPos({
+            x: bounds.left,
+            y: bounds.top,
+            height: bounds.height || 18,
+          });
+        }
+      } catch (e) {
+        // Likely index out of range because content hasn't synced yet
+        setPos(null);
       }
-    } catch (error) {
-      console.error('Error getting cursor position:', error);
-      setPosition(prev => ({ ...prev, visible: false }));
-    }
+    };
+
+    updatePosition();
+    
+    // Smooth update for rapid typing or window resizing
+    const interval = setInterval(updatePosition, 100);
+    return () => clearInterval(interval);
   }, [user.range, quillEditor]);
 
-  if (!position.visible || !user.color) return null;
+  if (!pos || !user.color) return null;
+
+  const displayName = user.name || user.userName || 'Someone';
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="absolute pointer-events-none z-50"
-      style={{
-        left: position.x,
-        top: position.y,
+      initial={{ opacity: 0, scale: 0.5 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.5 }}
+      transition={{ duration: 0.2 }}
+      style={{ 
+        position: 'absolute',
+        left: pos.x, 
+        top: pos.y, 
+        zIndex: 5000,
+        pointerEvents: 'none'
       }}
     >
-      {/* Cursor */}
-      <svg
-        width="11"
-        height="20"
-        viewBox="0 0 11 20"
-        fill="none"
-        style={{
-          filter: 'drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.2))',
-        }}
-      >
-        <path
-          d="M1.5 0L9.5 0L5.5 14.5L3.5 14.5L1.5 20L0 19L1.5 15.5L1.5 0Z"
-          fill={user.color}
-        />
-      </svg>
-      
-      {/* Username label */}
+      {/* Blinking caret */}
       <div
-        className="ml-3 px-2 py-0.5 rounded text-[10px] font-bold text-white whitespace-nowrap"
         style={{
+          width: 2,
+          height: pos.height,
           backgroundColor: user.color,
+          boxShadow: `0 0 8px ${user.color}`,
+          animation: 'cursorBlink 1s step-end infinite',
+        }}
+      />
+      
+      {/* Label */}
+      <div
+        style={{
+          position: 'absolute',
+          top: -22,
+          left: 0,
+          backgroundColor: user.color,
+          color: 'white',
+          fontSize: '11px',
+          fontWeight: '700',
+          padding: '2px 8px',
+          borderRadius: '4px',
+          whiteSpace: 'nowrap',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+          fontFamily: 'Inter, sans-serif'
         }}
       >
-        {user.userName}
+        {displayName}
       </div>
     </motion.div>
   );
@@ -72,73 +95,113 @@ const CursorOverlay = ({ quillRef, users }) => {
   const { socket } = useSocketContext();
   const [cursors, setCursors] = useState({});
   const [editorInstance, setEditorInstance] = useState(null);
+  const [containerEl, setContainerEl] = useState(null);
 
-  // Get editor instance from ref
+  // Initialize editor and container
   useEffect(() => {
-    if (quillRef?.current) {
-      const editor = quillRef.current.getEditor?.();
-      if (editor) {
-        setEditorInstance(editor);
-      }
-    }
-    
-    // Also check periodically in case ref isn't ready
-    const checkInterval = setInterval(() => {
-      if (quillRef?.current && !editorInstance) {
-        const ed = quillRef.current.getEditor?.();
-        if (ed) setEditorInstance(ed);
+    const timer = setInterval(() => {
+      if (quillRef?.current) {
+        const ed = quillRef.current.getEditor();
+        if (ed && ed.container) {
+          setEditorInstance(ed);
+          setContainerEl(ed.container);
+          ed.container.style.position = 'relative';
+          clearInterval(timer);
+        }
       }
     }, 100);
-    
-    return () => clearInterval(checkInterval);
+    return () => clearInterval(timer);
   }, [quillRef]);
 
+  // Handle socket events
   useEffect(() => {
     if (!socket) return;
 
-    const handleCursorUpdate = ({ userId, range, color, name }) => {
-      if (!userId || !range) return;
-      
-      setCursors((prev) => ({
-        ...prev,
-        [userId]: { userId, range, color, userName: name || 'Anonymous' },
-      }));
+    const onCursorUpdate = (data) => {
+      const { userId, range, color, name } = data;
+      if (!userId) return;
+
+      if (!range) {
+        setCursors(prev => {
+          const next = { ...prev };
+          delete next[userId];
+          return next;
+        });
+      } else {
+        setCursors(prev => ({
+          ...prev,
+          [userId]: { userId, range, color, name }
+        }));
+      }
     };
 
-    socket.on('cursor-update', handleCursorUpdate);
-
-    return () => {
-      socket.off('cursor-update', handleCursorUpdate);
-      setCursors({});
-    };
+    socket.on('cursor-update', onCursorUpdate);
+    return () => socket.off('cursor-update', onCursorUpdate);
   }, [socket]);
 
-  // Remove cursor when user leaves
+  // Sync with active users list and initialize from props
   useEffect(() => {
-    const currentUserIds = users.map((u) => u.userId);
-    setCursors((prev) => {
-      const filtered = {};
-      Object.keys(prev).forEach((key) => {
-        if (currentUserIds.includes(key)) {
-          filtered[key] = prev[key];
+    const activeUserIds = new Set(users.map(u => u.userId));
+    
+    setCursors(prev => {
+      const next = { ...prev };
+      let changed = false;
+
+      // Add/Update from users prop
+      users.forEach(u => {
+        if (u.userId !== socket?.id && u.range) { // Skip self
+          if (!next[u.userId] || JSON.stringify(next[u.userId].range) !== JSON.stringify(u.range)) {
+            next[u.userId] = { 
+              userId: u.userId, 
+              range: u.range, 
+              color: u.color, 
+              name: u.userName || u.name 
+            };
+            changed = true;
+          }
         }
       });
-      return filtered;
-    });
-  }, [users]);
 
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 50 }}>
-      <AnimatePresence>
-        {Object.values(cursors).map((cursor) => (
-          <LiveCursor
-            key={cursor.userId}
-            user={cursor}
-            quillEditor={editorInstance}
-          />
-        ))}
-      </AnimatePresence>
-    </div>
+      // Remove inactive
+      for (const id in next) {
+        if (!activeUserIds.has(id)) {
+          delete next[id];
+          changed = true;
+        }
+      }
+
+      return changed ? next : prev;
+    });
+  }, [users, socket]);
+
+  if (!containerEl || !editorInstance) return null;
+
+  return createPortal(
+    <>
+      <style>{`
+        @keyframes cursorBlink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+      `}</style>
+      <div 
+        className="ql-cursors-overlay"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          zIndex: 5000,
+          overflow: 'hidden'
+        }}
+      >
+        <AnimatePresence>
+          {Object.values(cursors).map(c => (
+            <LiveCursor key={c.userId} user={c} quillEditor={editorInstance} />
+          ))}
+        </AnimatePresence>
+      </div>
+    </>,
+    containerEl
   );
 };
 

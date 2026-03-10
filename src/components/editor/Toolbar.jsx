@@ -14,7 +14,7 @@ const Toolbar = ({
   const [showExportMenu, setShowExportMenu] = React.useState(false);
 
   return (
-    <div className="h-20 bg-black/40 backdrop-blur-2xl border-b border-white/5 flex items-center justify-between px-8 md:px-12 relative z-20">
+    <div className="h-20 bg-bg-primary/80 backdrop-blur-2xl border-b border-border flex items-center justify-between px-8 md:px-12 relative z-20">
       {/* Left: Title */}
       <div className="flex-1 max-w-2xl">
         <input
@@ -31,7 +31,7 @@ const Toolbar = ({
         {/* Save Status */}
         <div className="flex items-center gap-3">
           {isSaving ? (
-            <div className="flex items-center gap-2 py-1.5 px-3 bg-white/5 border border-white/5 rounded-full">
+            <div className="flex items-center gap-2 py-1.5 px-3 bg-bg-secondary border border-border rounded-full">
               <div className="w-3 h-3 animate-spin rounded-full border-[1.5px] border-accent/20 border-t-accent shadow-[0_0_8px_var(--accent-glow)]" />
               <span className="text-[10px] font-black uppercase tracking-widest text-accent">Syncing</span>
             </div>
@@ -47,7 +47,7 @@ const Toolbar = ({
           ) : null}
         </div>
 
-        <div className="h-8 w-px bg-white/5 mx-2" />
+        <div className="h-8 w-px bg-border mx-2" />
 
         <div className="flex items-center gap-3">
             {/* Share Button */}
@@ -65,7 +65,7 @@ const Toolbar = ({
             <div className="relative">
               <button
                 onClick={() => setShowExportMenu(!showExportMenu)}
-                className="w-11 h-11 flex items-center justify-center rounded-2xl bg-white/5 border border-white/5 text-text-muted hover:text-text-primary hover:bg-white/10 transition-all active:scale-90"
+                className="w-11 h-11 flex items-center justify-center rounded-2xl bg-bg-secondary border border-border text-text-muted hover:text-text-primary hover:bg-hover transition-all active:scale-90"
               >
                 <Download className="w-5 h-5" />
               </button>
@@ -81,14 +81,14 @@ const Toolbar = ({
                         initial={{ opacity: 0, scale: 0.95, y: 10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                        className="absolute right-0 mt-4 w-56 bg-black/60 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-20 py-3 overflow-hidden ring-1 ring-white/10"
+                        className="absolute right-0 mt-4 w-56 bg-bg-secondary/90 backdrop-blur-2xl border border-border rounded-3xl shadow-xl z-20 py-3 overflow-hidden ring-1 ring-border"
                     >
                       <button
                         onClick={() => {
                           onExport('pdf');
                           setShowExportMenu(false);
                         }}
-                        className="w-full px-5 py-3 text-[11px] font-black uppercase tracking-widest text-text-muted hover:text-text-primary hover:bg-white/5 text-left flex items-center gap-4 transition-all"
+                        className="w-full px-5 py-3 text-[11px] font-black uppercase tracking-widest text-text-muted hover:text-text-primary hover:bg-bg-tertiary text-left flex items-center gap-4 transition-all"
                       >
                         <div className="w-2 h-2 rounded-full bg-red-400" />
                         Export as PDF
@@ -98,7 +98,7 @@ const Toolbar = ({
                           onExport('markdown');
                           setShowExportMenu(false);
                         }}
-                        className="w-full px-5 py-3 text-[11px] font-black uppercase tracking-widest text-text-muted hover:text-text-primary hover:bg-white/5 text-left flex items-center gap-4 transition-all"
+                        className="w-full px-5 py-3 text-[11px] font-black uppercase tracking-widest text-text-muted hover:text-text-primary hover:bg-bg-tertiary text-left flex items-center gap-4 transition-all"
                       >
                         <div className="w-2 h-2 rounded-full bg-blue-400" />
                         Export Markdown
@@ -108,7 +108,7 @@ const Toolbar = ({
                           onExport('json');
                           setShowExportMenu(false);
                         }}
-                        className="w-full px-5 py-3 text-[11px] font-black uppercase tracking-widest text-text-muted hover:text-text-primary hover:bg-white/5 text-left flex items-center gap-4 transition-all"
+                        className="w-full px-5 py-3 text-[11px] font-black uppercase tracking-widest text-text-muted hover:text-text-primary hover:bg-bg-tertiary text-left flex items-center gap-4 transition-all"
                       >
                         <div className="w-2 h-2 rounded-full bg-accent" />
                         Export as JSON
