@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Plus, Search, Grid3x3, List, Filter } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useNotes } from '../hooks/useNotes';
 import Sidebar from '../components/layout/Sidebar';
@@ -20,8 +21,10 @@ const DashboardPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState(null);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedNoteId, setSelectedNoteId] = useState(null);
   const [shareEmail, setShareEmail] = useState('');
+  const [newNoteTitle, setNewNoteTitle] = useState('');
 
   useEffect(() => { loadNotes(); }, [filter, selectedTag]);
 
@@ -30,9 +33,16 @@ const DashboardPage = () => {
     catch (error) { console.error('Failed to load notes:', error); }
   };
 
-  const handleCreateNote = async () => {
+  const handleCreateNote = () => setShowCreateModal(true);
+
+  const handleCreateNoteSubmit = async () => {
     try {
-      const note = await createNote({ title: 'Untitled', content: { ops: [] } });
+      const note = await createNote({ 
+        title: newNoteTitle.trim() || 'Untitled', 
+        content: { ops: [] } 
+      });
+      setShowCreateModal(false);
+      setNewNoteTitle('');
       navigate(`/note/${note._id}`);
     } catch { toast.error('Failed to create note'); }
   };
@@ -68,7 +78,12 @@ const DashboardPage = () => {
     return note.title?.toLowerCase().includes(q) || note.excerpt?.toLowerCase().includes(q);
   });
 
-  const filterLabels = { all: 'All Notes', owned: 'My Notes', shared: 'Shared', trash: 'Trash' };
+  const filterLabels = { 
+    all: 'All Notes', 
+    owned: 'My Notes', 
+    shared: 'Shared with Me', 
+    trash: 'Trash' 
+  };
 
   return (
     <div className="h-screen flex bg-bg-primary overflow-hidden">
@@ -91,17 +106,37 @@ const DashboardPage = () => {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="max-w-6xl mx-auto"
+            className="max-w-7xl mx-auto"
           >
-            {/* Header */}
-            <div className="flex items-end justify-between mb-6">
+            {/* Header with Stats */}
+            <div className="flex items-end justify-between mb-8">
               <div>
-                <h2 className="text-2xl font-bold tracking-tight text-text-primary">
-                  {filterLabels[filter] || filter}
-                </h2>
-                <p className="text-sm text-text-muted mt-0.5">
-                  {selectedTag ? `Tagged: ${selectedTag}` : `${filteredNotes.length} notes`}
+                <div className="flex items-center gap-3 mb-1">
+                  <h2 className="text-3xl font-bold tracking-tight text-text-primary">
+                    {filterLabels[filter] || filter}
+                  </h2>
+                  {!loading && (
+                    <span className="px-2.5 py-1 bg-white/5 border border-white/5 rounded-full text-xs font-medium text-text-muted">
+                      {filteredNotes.length} {filteredNotes.length === 1 ? 'note' : 'notes'}
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-text-muted mt-1">
+                  {selectedTag ? `Filtered by tag: ${selectedTag}` : 'Manage and organize your notes'}
                 </p>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="primary" 
+                  size="sm" 
+                  onClick={handleCreateNote}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  New Note
+                </Button>
               </div>
             </div>
 
@@ -116,6 +151,24 @@ const DashboardPage = () => {
           </motion.div>
         </div>
       </div>
+
+      {/* Create Note Modal */}
+      <Modal isOpen={showCreateModal} onClose={() => { setShowCreateModal(false); setNewNoteTitle(''); }} title="Create New Note">
+        <div className="space-y-5">
+          <p className="text-sm text-text-secondary">Give your note a title to get started.</p>
+          <Input
+            label="Title"
+            placeholder="Enter note title..."
+            value={newNoteTitle}
+            onChange={(e) => setNewNoteTitle(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleCreateNoteSubmit()}
+          />
+          <div className="flex gap-3 justify-end pt-2">
+            <Button variant="secondary" size="sm" onClick={() => setShowCreateModal(false)}>Cancel</Button>
+            <Button variant="primary" size="sm" onClick={handleCreateNoteSubmit}>Create Note</Button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Share Modal */}
       <Modal isOpen={showShareModal} onClose={() => { setShowShareModal(false); setShareEmail(''); }} title="Share Note">
