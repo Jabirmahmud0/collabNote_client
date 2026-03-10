@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { FileText, Plus, Sparkles } from 'lucide-react';
 import NoteCard from './NoteCard';
 
-const NoteList = ({ notes, loading, onNoteClick, onEdit, onShare, onDelete, onCreateNote }) => {
+const NoteList = ({ notes, loading, onNoteClick, onEdit, onShare, onDelete, onRestore, onCreateNote, isTrash = false }) => {
   if (loading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -66,6 +66,8 @@ const NoteList = ({ notes, loading, onNoteClick, onEdit, onShare, onDelete, onCr
             onEdit={onEdit}
             onShare={onShare}
             onDelete={onDelete}
+            onRestore={onRestore}
+            isTrash={isTrash}
           />
         </motion.div>
       ))}

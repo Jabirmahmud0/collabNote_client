@@ -208,7 +208,9 @@ const DashboardPage = () => {
               onEdit={handleNoteClick}
               onShare={handleShare}
               onDelete={handleDelete}
+              onRestore={handleRestore}
               onCreateNote={handleCreateNote}
+              isTrash={filter === 'trash'}
             />
           </motion.div>
         </div>

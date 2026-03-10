@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { MoreVertical, Edit2, Trash2, Share2, Clock, Users, AlertTriangle } from 'lucide-react';
+import { MoreVertical, Edit2, Trash2, Share2, Clock, Users, AlertTriangle, RotateCcw, Trash } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Avatar from '../ui/Avatar';
 
-const NoteCard = ({ note, onClick, onEdit, onShare, onDelete }) => {
+const NoteCard = ({ note, onClick, onEdit, onShare, onDelete, onRestore, isTrash = false }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -107,28 +107,50 @@ const NoteCard = ({ note, onClick, onEdit, onShare, onDelete }) => {
                       exit={{ opacity: 0, scale: 0.95, y: 4 }}
                       className="absolute right-0 mt-1 w-44 bg-bg-elevated border border-border rounded-xl shadow-2xl z-20 py-1.5 overflow-hidden"
                     >
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onEdit(note._id); setShowMenu(false); }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-border transition-colors"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                        Edit Note
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onShare(note._id); setShowMenu(false); }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-border transition-colors"
-                      >
-                        <Share2 className="w-4 h-4" />
-                        Share
-                      </button>
-                      <div className="h-px bg-border mx-2 my-1" />
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleDeleteClick(); }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-danger hover:bg-danger/10 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        Delete
-                      </button>
+                      {isTrash ? (
+                        <>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onRestore(note._id); setShowMenu(false); }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-border transition-colors"
+                          >
+                            <RotateCcw className="w-4 h-4" />
+                            Restore
+                          </button>
+                          <div className="h-px bg-border mx-2 my-1" />
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDeleteClick(); }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-danger hover:bg-danger/10 transition-colors"
+                          >
+                            <Trash className="w-4 h-4" />
+                            Delete Permanently
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onEdit(note._id); setShowMenu(false); }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-border transition-colors"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                            Edit Note
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onShare(note._id); setShowMenu(false); }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-border transition-colors"
+                          >
+                            <Share2 className="w-4 h-4" />
+                            Share
+                          </button>
+                          <div className="h-px bg-border mx-2 my-1" />
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDeleteClick(); }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-danger hover:bg-danger/10 transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            Delete
+                          </button>
+                        </>
+                      )}
                     </motion.div>
                   </>
                 )}
@@ -211,7 +233,9 @@ const NoteCard = ({ note, onClick, onEdit, onShare, onDelete }) => {
                     <AlertTriangle className="w-6 h-6 text-danger" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-text-primary">Delete Note?</h3>
+                    <h3 className="text-lg font-bold text-text-primary">
+                      {isTrash ? 'Permanently Delete Note?' : 'Delete Note?'}
+                    </h3>
                     <p className="text-sm text-text-muted">
                       {note.title || 'Untitled Note'}
                     </p>
@@ -219,7 +243,9 @@ const NoteCard = ({ note, onClick, onEdit, onShare, onDelete }) => {
                 </div>
 
                 <p className="text-sm text-text-secondary mb-6">
-                  This will move the note to trash. You can restore it later or permanently delete it.
+                  {isTrash
+                    ? 'This action cannot be undone. The note will be permanently deleted.'
+                    : 'This will move the note to trash. You can restore it later or permanently delete it.'}
                 </p>
 
                 <div className="flex gap-3 justify-end">
@@ -233,7 +259,7 @@ const NoteCard = ({ note, onClick, onEdit, onShare, onDelete }) => {
                     onClick={handleConfirmDelete}
                     className="px-4 py-2 bg-danger hover:bg-danger-hover text-white rounded-lg text-sm font-medium transition-colors"
                   >
-                    Delete Note
+                    {isTrash ? 'Delete Permanently' : 'Delete Note'}
                   </button>
                 </div>
               </div>
