@@ -1,5 +1,4 @@
-import { diffLines } from 'diff';
-import React from 'react';
+import * as diff from 'jdiff';
 
 /**
  * Compare two Quill deltas and return the diff
@@ -8,7 +7,7 @@ export const compareDeltas = (delta1, delta2) => {
   const text1 = deltaToText(delta1);
   const text2 = deltaToText(delta2);
 
-  return diffLines(text1, text2);
+  return diff.diff_main(text1, text2);
 };
 
 /**
@@ -27,26 +26,22 @@ const deltaToText = (delta) => {
  */
 export const renderDiff = (diffs) => {
   return diffs.map((part, index) => {
-    if (part.added) {
-      return React.createElement(
-        'ins',
-        {
-          key: index,
-          className: 'bg-green-200 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-0.5 rounded',
-        },
-        part.value
+    const [type, text] = part;
+
+    if (type === diff.DELETE) {
+      return (
+        <del key={index} className="bg-red-200 dark:bg-red-900/30 text-red-800 dark:text-red-300 px-0.5 rounded">
+          {text}
+        </del>
       );
-    } else if (part.removed) {
-      return React.createElement(
-        'del',
-        {
-          key: index,
-          className: 'bg-red-200 dark:bg-red-900/30 text-red-800 dark:text-red-300 px-0.5 rounded',
-        },
-        part.value
+    } else if (type === diff.INSERT) {
+      return (
+        <ins key={index} className="bg-green-200 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-0.5 rounded">
+          {text}
+        </ins>
       );
     } else {
-      return React.createElement('span', { key: index }, part.value);
+      return <span key={index}>{text}</span>;
     }
   });
 };
@@ -58,11 +53,11 @@ export const getDiffSummary = (diffs) => {
   let additions = 0;
   let deletions = 0;
 
-  diffs.forEach((part) => {
-    if (part.added) {
-      additions += part.value.length;
-    } else if (part.removed) {
-      deletions += part.value.length;
+  diffs.forEach(([type, text]) => {
+    if (type === diff.INSERT) {
+      additions += text.length;
+    } else if (type === diff.DELETE) {
+      deletions += text.length;
     }
   });
 
@@ -78,14 +73,14 @@ export const createSideBySideDiff = (original, modified) => {
   const originalLines = [];
   const modifiedLines = [];
 
-  diffs.forEach((part) => {
-    const lines = part.value.split('\n');
+  diffs.forEach(([type, text]) => {
+    const lines = text.split('\n');
 
     lines.forEach((line, i) => {
-      if (part.removed) {
+      if (type === diff.DELETE) {
         originalLines.push({ type: 'delete', content: line });
         if (i < lines.length - 1) originalLines.push({ type: 'newline' });
-      } else if (part.added) {
+      } else if (type === diff.INSERT) {
         modifiedLines.push({ type: 'insert', content: line });
         if (i < lines.length - 1) modifiedLines.push({ type: 'newline' });
       } else {

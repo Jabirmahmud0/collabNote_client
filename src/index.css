@@ -1,1 +1,24 @@
 @import "tailwindcss";
+@import "./styles/globals.css";
+
+.premium-card {
+  @apply bg-white/3 backdrop-blur-2xl border border-white/8 rounded-[2.5rem] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)];
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.premium-card-hover {
+  @apply transition-all duration-500 ease-[0.16,1,0.3,1];
+}
+
+.premium-card-hover:hover {
+  @apply -translate-y-2 border-white/15 bg-white/5 shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)];
+}
