@@ -36,28 +36,37 @@ const NoteEditor = ({ content, onChange, readOnly = false }) => {
     'code-block',
   ];
 
-  const handleTextChange = useCallback((delta, oldDelta, source) => {
+  const handleTextChange = useCallback((content, delta, source, editor) => {
     if (source === 'user') {
       const noteId = window.location.pathname.split('/').pop();
+
+      // Get the delta format explicitly
+      const deltaOps = editor.getContents(); // This returns the Delta object
       
+      console.log('Content change:', {
+        content, // Might be HTML string
+        delta: deltaOps, // Should be Delta object
+        source
+      });
+
       if (socket) {
-        sendNoteChange(noteId, delta);
+        sendNoteChange(noteId, deltaOps);
         sendTyping(noteId);
-        
+
         if (typingTimeoutRef.current) {
           clearTimeout(typingTimeoutRef.current);
         }
-        
+
         typingTimeoutRef.current = setTimeout(() => {
           sendStopTyping(noteId);
         }, 1000);
       }
 
       if (onChange) {
-        onChange(delta);
+        onChange(deltaOps);
       }
 
-      lastContentRef.current = delta;
+      lastContentRef.current = deltaOps;
     }
   }, [socket, onChange, sendNoteChange, sendTyping, sendStopTyping]);
 

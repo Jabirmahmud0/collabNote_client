@@ -7,14 +7,75 @@ import Avatar from '../ui/Avatar';
 const NoteCard = ({ note, onClick, onEdit, onShare, onDelete }) => {
   const [showMenu, setShowMenu] = useState(false);
 
-  const excerpt = note.excerpt || (() => {
-    if (!note.content?.ops) return 'No content yet...';
-    const text = note.content.ops
-      .filter((op) => typeof op.insert === 'string')
+  // Debug logging
+  const contentDebug = note.content ? (typeof note.content === 'string' ? 'STRING: ' + note.content.substring(0, 100) : Object.keys(note.content)) : null;
+  console.log('NoteCard received note:', {
+    _id: note._id,
+    title: note.title,
+    hasContent: !!note.content,
+    contentType: typeof note.content,
+    contentDebug,
+    contentOps: note.content?.ops,
+    hasExcerpt: !!note.excerpt,
+    excerpt: note.excerpt
+  });
+
+  // Get excerpt from backend or generate from content
+  const excerpt = (() => {
+    // First try backend excerpt
+    if (note.excerpt && note.excerpt.trim()) return note.excerpt;
+    
+    // Fallback: generate from content
+    if (!note.content) return 'No content yet...';
+    
+    // If content is HTML string, strip tags
+    if (typeof note.content === 'string') {
+      const text = note.content
+        .replace(/<[^>]*>/g, ' ') // Remove HTML tags
+        .replace(/&nbsp;/g, ' ')   // Convert &nbsp; to space
+        .replace(/\s+/g, ' ')      // Normalize whitespace
+        .trim()
+        .slice(0, 120);
+      return text || 'Empty note';
+    }
+    
+    // Handle Delta object format
+    const ops = note.content.ops || note.content;
+    
+    if (!Array.isArray(ops)) return 'No content yet...';
+    
+    const text = ops
+      .filter((op) => op && typeof op.insert === 'string')
       .map((op) => op.insert)
       .join(' ')
       .slice(0, 120);
-    return text || 'Empty note';
+    return text.trim() || 'Empty note';
+  })();
+
+  // Calculate word count
+  const wordCount = (() => {
+    if (!note.content) return 0;
+    
+    // If content is HTML string, strip tags and count
+    if (typeof note.content === 'string') {
+      const text = note.content
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      return text ? text.split(/\s+/).filter(w => w).length : 0;
+    }
+    
+    // Handle Delta object format
+    const ops = note.content.ops || note.content;
+    
+    if (!Array.isArray(ops)) return 0;
+    
+    const text = ops
+      .filter((op) => op && typeof op.insert === 'string')
+      .map((op) => op.insert)
+      .join(' ');
+    return text.trim().split(/\s+/).filter(w => w).length;
   })();
 
   const collaborators = note.collaborators || [];
@@ -125,7 +186,7 @@ const NoteCard = ({ note, onClick, onEdit, onShare, onDelete }) => {
         {/* Word Count */}
         <div className="flex items-center gap-1.5 text-xs text-text-muted">
           <FileText className="w-3.5 h-3.5" />
-          <span>{note.wordCount || 0} words</span>
+          <span>{wordCount} words</span>
         </div>
 
         {/* Collaborators */}
