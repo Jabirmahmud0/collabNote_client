@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { FileText, Plus, Sparkles } from 'lucide-react';
 import NoteCard from './NoteCard';
 
-const NoteList = ({ notes, loading, onNoteClick, onEdit, onShare, onDelete }) => {
+const NoteList = ({ notes, loading, onNoteClick, onEdit, onShare, onDelete, onCreateNote }) => {
   if (loading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -41,6 +41,7 @@ const NoteList = ({ notes, loading, onNoteClick, onEdit, onShare, onDelete }) =>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
+          onClick={onCreateNote}
           className="inline-flex items-center gap-2.5 px-6 py-3 bg-accent hover:bg-accent-hover text-white rounded-xl font-semibold text-sm shadow-[0_4px_16px_rgba(99,102,241,0.3)] hover:shadow-[0_8px_32px_rgba(99,102,241,0.4)] transition-all"
         >
           <Plus className="w-4 h-4" />

@@ -1,13 +1,17 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useImperativeHandle, forwardRef } from 'react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
-import { useSocket } from '../../hooks/useSocket';
+import CursorOverlay from './CursorOverlay';
 
-const NoteEditor = ({ content, onChange, readOnly = false }) => {
+const NoteEditor = forwardRef(({ content, onChange, onSelectionChange, readOnly = false, users }, ref) => {
   const quillRef = useRef(null);
-  const { socket, sendNoteChange, sendCursorMove, sendTyping, sendStopTyping } = useSocket();
   const typingTimeoutRef = useRef(null);
-  const lastContentRef = useRef(content);
+
+  // Expose quill editor to parent
+  useImperativeHandle(ref, () => ({
+    getEditor: () => quillRef.current?.getEditor(),
+    container: quillRef.current?.container,
+  }));
 
   const modules = {
     toolbar: [
@@ -38,59 +42,40 @@ const NoteEditor = ({ content, onChange, readOnly = false }) => {
 
   const handleTextChange = useCallback((content, delta, source, editor) => {
     if (source === 'user') {
-      const noteId = window.location.pathname.split('/').pop();
-
-      // Get the delta format explicitly
-      const deltaOps = editor.getContents(); // This returns the Delta object
-      
-      console.log('Content change:', {
-        content, // Might be HTML string
-        delta: deltaOps, // Should be Delta object
-        source
-      });
-
-      if (socket) {
-        sendNoteChange(noteId, deltaOps);
-        sendTyping(noteId);
-
-        if (typingTimeoutRef.current) {
-          clearTimeout(typingTimeoutRef.current);
-        }
-
-        typingTimeoutRef.current = setTimeout(() => {
-          sendStopTyping(noteId);
-        }, 1000);
-      }
+      // Get the full document state
+      const fullContent = editor.getContents();
 
       if (onChange) {
-        onChange(deltaOps);
+        onChange(fullContent);
       }
-
-      lastContentRef.current = deltaOps;
     }
-  }, [socket, onChange, sendNoteChange, sendTyping, sendStopTyping]);
+  }, [onChange]);
 
   const handleSelectionChange = useCallback((range, source, editor) => {
-    if (range && socket) {
-      const noteId = window.location.pathname.split('/').pop();
-      sendCursorMove(noteId, range);
+    if (onSelectionChange) {
+      onSelectionChange(range, source);
     }
-  }, [socket, sendCursorMove]);
+  }, [onSelectionChange]);
 
   return (
     <div className="h-full flex flex-col relative">
-      <ReactQuill
-        ref={quillRef}
-        theme="snow"
-        value={content}
-        onChange={handleTextChange}
-        onSelectionChange={handleSelectionChange}
-        modules={modules}
-        formats={formats}
-        readOnly={readOnly}
-        className="flex-1 flex flex-col pt-0"
-        style={{ flex: 1 }}
-      />
+      <div className="relative flex-1 flex flex-col">
+        <ReactQuill
+          ref={quillRef}
+          theme="snow"
+          value={content}
+          onChange={handleTextChange}
+          onSelectionChange={handleSelectionChange}
+          modules={modules}
+          formats={formats}
+          readOnly={readOnly}
+          className="flex-1"
+          style={{ flex: 1 }}
+        />
+        {/* Cursor Overlay */}
+        <CursorOverlay quillRef={quillRef} users={users || []} />
+      </div>
+      
       <style>{`
         .quill {
           flex: 1;
@@ -175,6 +160,6 @@ const NoteEditor = ({ content, onChange, readOnly = false }) => {
       `}</style>
     </div>
   );
-};
+});
 
 export default NoteEditor;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNotes } from '../hooks/useNotes';
@@ -18,7 +18,7 @@ const EditorPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { getNote, updateNote, shareNote } = useNotes();
-  const { socket, joinRoom, leaveRoom, users } = useSocket();
+  const { socket, users, joinRoom, leaveRoom, sendNoteChange, sendCursorMove, sendTyping, sendStopTyping } = useSocket();
 
   const [note, setNote] = useState(null);
   const [content, setContent] = useState({ ops: [] });
@@ -27,7 +27,10 @@ const EditorPage = () => {
   const [isSaved, setIsSaved] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareEmail, setShareEmail] = useState('');
+  const [sharePermission, setSharePermission] = useState('edit');
   const [saveTimeout, setSaveTimeout] = useState(null);
+  const isRemoteChange = useRef(false);
+  const typingTimeoutRef = useRef(null);
 
   useEffect(() => { loadNote(); }, [id]);
 
@@ -38,9 +41,20 @@ const EditorPage = () => {
 
   useEffect(() => {
     if (!socket) return;
+    
     const handleNoteUpdate = ({ delta, userId }) => {
-      if (userId !== user?.id) console.log('Remote update from:', userId);
+      // Don't apply your own changes
+      if (userId === user?.id) return;
+      
+      console.log('Applying remote update from:', userId);
+      
+      // Mark as remote change to prevent save loop
+      isRemoteChange.current = true;
+      
+      // Simply replace the content with the remote content
+      setContent(delta);
     };
+    
     socket.on('note-update', handleNoteUpdate);
     return () => { socket.off('note-update', handleNoteUpdate); };
   }, [socket, user]);
@@ -54,23 +68,51 @@ const EditorPage = () => {
     } catch { toast.error('Failed to load note'); navigate('/dashboard'); }
   };
 
-  const handleContentChange = useCallback((delta) => {
-    setContent(delta);
+  const handleContentChange = useCallback((fullContent) => {
+    // Skip if this is a remote change (to prevent loops)
+    if (isRemoteChange.current) {
+      isRemoteChange.current = false;
+      return;
+    }
+    
+    setContent(fullContent);
+    
     if (saveTimeout) clearTimeout(saveTimeout);
     setIsSaving(true);
     setIsSaved(false);
+    
+    // Send socket update with full content
+    if (socket) {
+      sendNoteChange(id, fullContent);
+      sendTyping(id);
+      
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      
+      typingTimeoutRef.current = setTimeout(() => {
+        sendStopTyping(id);
+      }, 1000);
+    }
+    
     const timeout = setTimeout(async () => {
       try {
-        await updateNote(id, { content: delta, saveVersion: false });
+        await updateNote(id, { content: fullContent, saveVersion: false });
         setIsSaving(false);
         setIsSaved(true);
         setTimeout(() => setIsSaved(false), 2000);
       } catch { setIsSaving(false); toast.error('Failed to save'); }
     }, 2000);
     setSaveTimeout(timeout);
-  }, [id, updateNote, saveTimeout]);
+  }, [id, updateNote, saveTimeout, socket, sendNoteChange, sendTyping, sendStopTyping]);
 
   const handleTitleChange = useCallback((t) => setTitle(t), []);
+
+  const handleSelectionChange = useCallback((range, source) => {
+    if (source === 'user' && range && socket) {
+      sendCursorMove(id, range);
+    }
+  }, [id, socket, sendCursorMove]);
 
   const handleTitleBlur = async () => {
     if (title !== note?.title) {
@@ -81,9 +123,18 @@ const EditorPage = () => {
 
   const handleShare = () => setShowShareModal(true);
 
+  const editorRef = useRef(null);
+
   const handleShareSubmit = async () => {
     if (!shareEmail) { toast.error('Enter an email'); return; }
-    try { await shareNote(id, shareEmail, 'view'); toast.success(`Shared with ${shareEmail}`); setShowShareModal(false); setShareEmail(''); loadNote(); }
+    try { 
+      await shareNote(id, shareEmail, sharePermission);
+      toast.success(`Shared with ${shareEmail} as ${sharePermission}`); 
+      setShowShareModal(false); 
+      setShareEmail('');
+      setSharePermission('edit');
+      loadNote(); 
+    }
     catch (err) { toast.error(err.response?.data?.message || 'Failed to share'); }
   };
 
@@ -124,15 +175,55 @@ const EditorPage = () => {
       )}
 
       {/* Editor */}
-      <div className="flex-1 overflow-hidden">
-        <NoteEditor content={content} onChange={handleContentChange} />
+      <div className="flex-1 overflow-hidden relative">
+        <NoteEditor 
+          ref={editorRef}
+          content={content} 
+          onChange={handleContentChange}
+          onSelectionChange={handleSelectionChange}
+          users={users}
+        />
       </div>
 
       {/* Share Modal */}
-      <Modal isOpen={showShareModal} onClose={() => setShowShareModal(false)} title="Share Note">
+      <Modal isOpen={showShareModal} onClose={() => { setShowShareModal(false); setShareEmail(''); setSharePermission('edit'); }} title="Share Note">
         <div className="space-y-5">
           <p className="text-sm text-text-secondary">Invite someone to collaborate on this note.</p>
-          <Input label="Email" type="email" placeholder="collaborator@example.com" value={shareEmail} onChange={(e) => setShareEmail(e.target.value)} />
+          <Input 
+            label="Email" 
+            type="email" 
+            placeholder="collaborator@example.com" 
+            value={shareEmail} 
+            onChange={(e) => setShareEmail(e.target.value)} 
+          />
+          <div>
+            <label className="text-sm font-medium text-text-secondary mb-2 block">Permission</label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setSharePermission('edit')}
+                className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium border transition-all ${
+                  sharePermission === 'edit'
+                    ? 'bg-accent text-white border-accent'
+                    : 'bg-bg-tertiary text-text-secondary border-border hover:border-accent/50'
+                }`}
+              >
+                Can Edit
+              </button>
+              <button
+                onClick={() => setSharePermission('view')}
+                className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium border transition-all ${
+                  sharePermission === 'view'
+                    ? 'bg-accent text-white border-accent'
+                    : 'bg-bg-tertiary text-text-secondary border-border hover:border-accent/50'
+                }`}
+              >
+                Can View
+              </button>
+            </div>
+            <p className="text-xs text-text-muted mt-2">
+              {sharePermission === 'edit' ? 'Collaborator can view and edit the note' : 'Collaborator can only view the note'}
+            </p>
+          </div>
           <div className="flex gap-3 justify-end pt-2">
             <Button variant="secondary" size="sm" onClick={() => setShowShareModal(false)}>Cancel</Button>
             <Button variant="primary" size="sm" onClick={handleShareSubmit}>Share</Button>

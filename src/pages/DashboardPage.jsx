@@ -24,9 +24,17 @@ const DashboardPage = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedNoteId, setSelectedNoteId] = useState(null);
   const [shareEmail, setShareEmail] = useState('');
+  const [sharePermission, setSharePermission] = useState('edit');
   const [newNoteTitle, setNewNoteTitle] = useState('');
 
-  useEffect(() => { loadNotes(); }, [filter, selectedTag]);
+  // Auto-refresh notes every 30 seconds to catch shared notes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadNotes();
+    }, 30000);
+    
+    return () => clearInterval(interval);
+  }, [filter, selectedTag]);
 
   const loadNotes = async () => {
     try { await fetchNotes({ filter, tag: selectedTag }); }
@@ -51,25 +59,49 @@ const DashboardPage = () => {
 
   const handleDelete = async (noteId) => {
     const isTrash = filter === 'trash';
-    if (!window.confirm(`${isTrash ? 'Permanently delete' : 'Delete'} this note?`)) return;
     try {
-      if (isTrash) { await permanentDelete(noteId); toast.success('Permanently deleted'); }
-      else { await deleteNote(noteId); toast.success('Moved to trash'); }
-      loadNotes();
-    } catch { toast.error('Failed to delete'); }
+      if (isTrash) {
+        await permanentDelete(noteId);
+        toast.success('Note permanently deleted');
+      } else {
+        await deleteNote(noteId);
+        toast.success('Note moved to trash');
+      }
+      await loadNotes();
+    } catch (error) {
+      console.error('Delete error:', error);
+      const message = error.response?.data?.message || error.message || 'Failed to delete note';
+      toast.error(message);
+    }
   };
 
   const handleRestore = async (noteId) => {
-    try { await restoreNote(noteId); toast.success('Restored'); loadNotes(); }
-    catch { toast.error('Failed to restore'); }
+    try {
+      await restoreNote(noteId);
+      toast.success('Note restored from trash');
+      await loadNotes();
+    } catch (error) {
+      console.error('Restore error:', error);
+      const message = error.response?.data?.message || error.message || 'Failed to restore note';
+      toast.error(message);
+    }
   };
 
   const handleShare = (noteId) => { setSelectedNoteId(noteId); setShowShareModal(true); };
 
   const handleShareSubmit = async () => {
     if (!shareEmail) { toast.error('Enter an email'); return; }
-    try { toast.success(`Shared with ${shareEmail}`); setShowShareModal(false); setShareEmail(''); }
-    catch { toast.error('Failed to share'); }
+    try {
+      await shareNote(selectedNoteId, shareEmail, sharePermission);
+      toast.success(`Shared with ${shareEmail} as ${sharePermission}`);
+      setShowShareModal(false);
+      setShareEmail('');
+      setSharePermission('edit');
+    } catch (error) {
+      console.error('Share error:', error);
+      const message = error.response?.data?.message || 'Failed to share note';
+      toast.error(message);
+    }
   };
 
   const filteredNotes = notes.filter((note) => {
@@ -147,6 +179,7 @@ const DashboardPage = () => {
               onEdit={handleNoteClick}
               onShare={handleShare}
               onDelete={handleDelete}
+              onCreateNote={handleCreateNote}
             />
           </motion.div>
         </div>
@@ -171,16 +204,44 @@ const DashboardPage = () => {
       </Modal>
 
       {/* Share Modal */}
-      <Modal isOpen={showShareModal} onClose={() => { setShowShareModal(false); setShareEmail(''); }} title="Share Note">
+      <Modal isOpen={showShareModal} onClose={() => { setShowShareModal(false); setShareEmail(''); setSharePermission('edit'); }} title="Share Note">
         <div className="space-y-5">
-          <p className="text-sm text-text-secondary">Enter the email of the person you want to share with.</p>
+          <p className="text-sm text-text-secondary">Invite someone to collaborate on this note.</p>
           <Input
             label="Email"
             type="email"
-            placeholder="colleague@work.com"
+            placeholder="collaborator@example.com"
             value={shareEmail}
             onChange={(e) => setShareEmail(e.target.value)}
           />
+          <div>
+            <label className="text-sm font-medium text-text-secondary mb-2 block">Permission</label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setSharePermission('edit')}
+                className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium border transition-all ${
+                  sharePermission === 'edit'
+                    ? 'bg-accent text-white border-accent'
+                    : 'bg-bg-tertiary text-text-secondary border-border hover:border-accent/50'
+                }`}
+              >
+                Can Edit
+              </button>
+              <button
+                onClick={() => setSharePermission('view')}
+                className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium border transition-all ${
+                  sharePermission === 'view'
+                    ? 'bg-accent text-white border-accent'
+                    : 'bg-bg-tertiary text-text-secondary border-border hover:border-accent/50'
+                }`}
+              >
+                Can View
+              </button>
+            </div>
+            <p className="text-xs text-text-muted mt-2">
+              {sharePermission === 'edit' ? 'Collaborator can view and edit the note' : 'Collaborator can only view the note'}
+            </p>
+          </div>
           <div className="flex gap-3 justify-end pt-2">
             <Button variant="secondary" size="sm" onClick={() => setShowShareModal(false)}>Cancel</Button>
             <Button variant="primary" size="sm" onClick={handleShareSubmit}>Send Invite</Button>

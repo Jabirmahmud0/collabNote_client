@@ -97,8 +97,9 @@ export const useNotes = () => {
     setError(null);
 
     try {
-      await api.delete(`/api/notes/${noteId}`);
+      const response = await api.delete(`/api/notes/${noteId}`);
       setNotes((prev) => prev.filter((note) => note._id !== noteId));
+      return response.data;
     } catch (err) {
       setError(err.message);
       throw err;
@@ -112,12 +113,13 @@ export const useNotes = () => {
     setError(null);
 
     try {
-      await api.post(`/api/notes/${noteId}/restore`);
+      const response = await api.post(`/api/notes/${noteId}/restore`);
       setNotes((prev) =>
         prev.map((note) =>
           note._id === noteId ? { ...note, isDeleted: false, deletedAt: null } : note
         )
       );
+      return response.data;
     } catch (err) {
       setError(err.message);
       throw err;
@@ -131,8 +133,9 @@ export const useNotes = () => {
     setError(null);
 
     try {
-      await api.delete(`/api/notes/${noteId}/permanent`);
+      const response = await api.delete(`/api/notes/${noteId}/permanent`);
       setNotes((prev) => prev.filter((note) => note._id !== noteId));
+      return response.data;
     } catch (err) {
       setError(err.message);
       throw err;
