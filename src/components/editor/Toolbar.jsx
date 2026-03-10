@@ -1,6 +1,7 @@
 import React from 'react';
 import { Save, Share2, Download, MoreVertical } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import Button from '../ui/Button';
 
 const Toolbar = ({
   title,

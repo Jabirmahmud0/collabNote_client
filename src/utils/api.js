@@ -16,6 +16,11 @@ api.interceptors.request.use(
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      // Debug: log token info (decode without verification)
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        console.log('[API] Request token user:', payload.id, 'exp:', new Date(payload.exp * 1000).toISOString());
+      } catch (e) {}
     }
     return config;
   },

@@ -78,6 +78,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (name, email, password) => {
+    // Clear any existing tokens before registering
+    localStorage.clear();
+    
     const response = await api.post('/api/auth/register', {
       name,
       email,
@@ -85,30 +88,55 @@ export const AuthProvider = ({ children }) => {
     });
 
     const { user, accessToken } = response.data.data;
-    
+
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('userName', user.name);
     localStorage.setItem('userEmail', user.email);
     localStorage.setItem('userAvatar', user.avatar || '');
-    
+
     setUser(user);
     return response.data;
   };
 
   const login = async (email, password) => {
+    // Clear any existing tokens before logging in
+    localStorage.clear();
+    
     const response = await api.post('/api/auth/login', {
       email,
       password,
     });
 
     const { user, accessToken } = response.data.data;
-    
+
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('userName', user.name);
     localStorage.setItem('userEmail', user.email);
     localStorage.setItem('userAvatar', user.avatar || '');
-    
+
     setUser(user);
+    return response.data;
+  };
+
+  const loginWithGoogle = async (name, email, googleId, avatar) => {
+    // Clear any existing tokens before Google login
+    localStorage.clear();
+    
+    const response = await api.post('/api/auth/google', {
+      name,
+      email,
+      googleId,
+      avatar
+    });
+
+    const { user: authUser, accessToken } = response.data.data;
+
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('userName', authUser.name);
+    localStorage.setItem('userEmail', authUser.email);
+    localStorage.setItem('userAvatar', authUser.avatar || '');
+
+    setUser(authUser);
     return response.data;
   };
 
@@ -141,6 +169,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     register,
     login,
+    loginWithGoogle,
     logout,
     updateUser,
     isAuthenticated: !!user,

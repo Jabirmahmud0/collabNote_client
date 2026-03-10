@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, User, Eye, EyeOff, ArrowLeft, Sparkles } from 'lucide-react';
+import { auth, googleProvider } from '../config/firebase';
+import { signInWithPopup, signOut } from 'firebase/auth';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import toast from 'react-hot-toast';
@@ -13,7 +15,7 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [errors, setErrors] = useState({});
-  const { login, register } = useAuth();
+  const { login, register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const validateForm = () => {
@@ -42,6 +44,30 @@ const AuthPage = () => {
       navigate('/dashboard');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      setLoading(true);
+      
+      // Clear any existing tokens and sign out from Firebase first
+      localStorage.clear();
+      await signOut(auth);
+      
+      const result = await signInWithPopup(auth, googleProvider);
+
+      const { displayName, email, uid, photoURL } = result.user;
+
+      await loginWithGoogle(displayName, email, uid, photoURL);
+
+      toast.success('Google sign-in successful!');
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Google login error:', error);
+      toast.error(error.message || 'Failed to authenticate with Google');
     } finally {
       setLoading(false);
     }
@@ -259,7 +285,8 @@ const AuthPage = () => {
               variant="secondary"
               size="md"
               className="w-full"
-              onClick={() => toast.error('Google OAuth coming soon!')}
+              onClick={handleGoogleLogin}
+              loading={loading}
             >
               <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />

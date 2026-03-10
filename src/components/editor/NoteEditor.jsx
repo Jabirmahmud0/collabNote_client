@@ -1,6 +1,6 @@
 import React, { useCallback, useRef } from 'react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 import { useSocket } from '../../hooks/useSocket';
 
 const NoteEditor = ({ content, onChange, readOnly = false }) => {
@@ -28,7 +28,6 @@ const NoteEditor = ({ content, onChange, readOnly = false }) => {
     'underline',
     'strike',
     'list',
-    'bullet',
     'color',
     'background',
     'align',
@@ -83,7 +82,7 @@ const NoteEditor = ({ content, onChange, readOnly = false }) => {
         className="flex-1 flex flex-col pt-0"
         style={{ flex: 1 }}
       />
-      <style jsx global>{`
+      <style>{`
         .quill {
           flex: 1;
           display: flex;
