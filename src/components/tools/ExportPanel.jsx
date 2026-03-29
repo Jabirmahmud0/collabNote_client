@@ -42,7 +42,7 @@ const ExportPanel = () => {
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex-1 flex flex-col min-h-0">
       <div className="p-4 border-b border-border">
         <h2 className="text-lg font-semibold text-primary">Export</h2>
         <p className="text-sm text-text-secondary">
@@ -50,7 +50,7 @@ const ExportPanel = () => {
         </p>
       </div>
 
-      <div className="flex-1 flex flex-col p-4 gap-4">
+      <div className="flex-1 flex flex-col p-6 gap-6 overflow-y-auto custom-scrollbar min-h-0">
         {/* Note Selector */}
         <div>
           <label className="block text-sm font-medium text-text-secondary mb-2">

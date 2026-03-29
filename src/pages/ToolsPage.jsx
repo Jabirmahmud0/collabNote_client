@@ -72,7 +72,7 @@ const ToolsPage = () => {
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             className="h-full p-6"
           >
-            <div className="cn-card h-full p-6 overflow-y-auto custom-scrollbar">
+            <div className="cn-card h-full flex flex-col overflow-hidden">
               {activeComponent}
             </div>
           </motion.div>
