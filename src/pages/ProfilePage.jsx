@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
@@ -20,10 +20,44 @@ const ProfilePage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletePassword, setDeletePassword] = useState('');
   const [formData, setFormData] = useState({ name: '', email: '', currentPassword: '', newPassword: '' });
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (user) setFormData((prev) => ({ ...prev, name: user.name || '', email: user.email || '' }));
   }, [user]);
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5MB');
+      return;
+    }
+
+    const uploadData = new FormData();
+    uploadData.append('avatar', file);
+
+    setLoading(true);
+    try {
+      const res = await api.patch('/api/users/me/avatar', uploadData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      updateUser({ avatar: res.data.data.user.avatar });
+      toast.success('Avatar updated successfully');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update avatar');
+    } finally {
+      setLoading(false);
+      // Reset input
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
@@ -90,9 +124,20 @@ const ProfilePage = () => {
           <div className="flex items-center gap-5 pb-5 mb-5 border-b border-border">
             <div className="relative">
               <Avatar src={user?.avatar} name={user?.name} size="xl" />
-              <button className="absolute -bottom-1 -right-1 w-7 h-7 bg-accent text-white rounded-lg flex items-center justify-center text-xs shadow-md hover:scale-110 active:scale-95 transition-transform">
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={loading}
+                className="absolute -bottom-1 -right-1 w-7 h-7 bg-accent text-white rounded-lg flex items-center justify-center text-xs shadow-md hover:scale-110 active:scale-95 transition-transform disabled:opacity-50 disabled:pointer-events-none"
+              >
                 <Image className="w-3 h-3" />
               </button>
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleAvatarUpload} 
+                accept="image/*" 
+                className="hidden" 
+              />
             </div>
             <div>
               <h3 className="font-semibold text-text-primary">{user?.name}</h3>
