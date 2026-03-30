@@ -30,11 +30,16 @@ export const AuthProvider = ({ children }) => {
     try {
       // Decode token to get user info (simple JWT decode)
       const decoded = JSON.parse(atob(token.split('.')[1]));
-      
+
       // Check if token is expired
       if (decoded.exp * 1000 < Date.now()) {
         // Token expired, try to refresh
-        await refreshAccessToken();
+        const refreshed = await refreshAccessToken();
+        if (!refreshed) {
+          // Refresh failed, clear auth state
+          setUser(null);
+        }
+        setLoading(false);
         return;
       }
 
@@ -49,6 +54,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Auth check failed:', error);
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -58,15 +64,14 @@ export const AuthProvider = ({ children }) => {
     try {
       const refreshToken = localStorage.getItem('refreshToken');
       if (!refreshToken) {
-        setLoading(false);
-        return;
+        return false;
       }
 
       const response = await api.post('/api/auth/refresh', { refreshToken });
       const { accessToken } = response.data.data;
-      
+
       localStorage.setItem('accessToken', accessToken);
-      
+
       // Update user state directly with new token info
       const decoded = JSON.parse(atob(accessToken.split('.')[1]));
       setUser({
@@ -75,11 +80,13 @@ export const AuthProvider = ({ children }) => {
         email: localStorage.getItem('userEmail') || '',
         avatar: localStorage.getItem('userAvatar') || '',
       });
+      
+      return true;
     } catch (error) {
       console.error('Token refresh failed:', error);
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
-      setLoading(false);
+      return false;
     }
   };
 

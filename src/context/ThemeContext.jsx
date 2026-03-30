@@ -20,12 +20,9 @@ export const ThemeProvider = ({ children }) => {
   useEffect(() => {
     const html = document.documentElement;
     
-    if (theme === 'dark') {
-      html.removeAttribute('data-theme');
-    } else {
-      html.setAttribute('data-theme', 'light');
-    }
-    
+    // Always explicitly set the attribute to avoid any CSS conflicts
+    html.setAttribute('data-theme', theme);
+
     localStorage.setItem('theme', theme);
   }, [theme]);
 
