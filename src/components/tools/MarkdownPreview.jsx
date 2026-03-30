@@ -14,7 +14,7 @@ const MarkdownPreview = () => {
   return (
     <div className="flex-1 flex flex-col min-h-0">
       <div className="p-4 border-b border-border">
-        <h2 className="text-lg font-semibold text-primary">Markdown Preview</h2>
+        <h2 className="text-lg font-semibold text-text-primary">Markdown Preview</h2>
         <p className="text-sm text-text-secondary">
           Type markdown on the left, see the preview on the right
         </p>
@@ -47,7 +47,7 @@ const MarkdownPreview = () => {
               prose-h1:text-3xl prose-h1:font-extrabold
               prose-h2:text-2xl prose-h2:font-bold prose-h2:mt-8
               prose-h3:text-xl prose-h3:font-semibold
-              prose-p:text-text-primary prose-p:leading-relaxed prose-p:mb-4
+              prose-p:leading-relaxed prose-p:mb-4
               prose-a:text-accent prose-a:no-underline hover:prose-a:underline
               prose-blockquote:border-l-4 prose-blockquote:border-accent prose-blockquote:bg-accent/5 prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:rounded-r-lg prose-blockquote:italic
               prose-code:text-accent prose-code:bg-accent/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:before:content-none prose-code:after:content-none

@@ -38,7 +38,7 @@ const AISummarizer = () => {
   return (
     <div className="flex-1 flex flex-col min-h-0">
       <div className="p-4 border-b border-border">
-        <h2 className="text-lg font-semibold text-primary">AI Summary</h2>
+        <h2 className="text-lg font-semibold text-text-primary">AI Summary</h2>
         <p className="text-sm text-text-secondary">
           Generate AI-powered summaries of your notes
         </p>
@@ -79,7 +79,7 @@ const AISummarizer = () => {
             <h3 className="text-sm font-medium text-text-secondary mb-2">
               Summary:
             </h3>
-            <div className="prose prose-sm dark:prose-invert max-w-none text-primary">
+            <div className="prose prose-sm dark:prose-invert max-w-none text-text-primary prose-headings:text-text-primary prose-strong:text-text-primary">
               {summary}
             </div>
           </div>
