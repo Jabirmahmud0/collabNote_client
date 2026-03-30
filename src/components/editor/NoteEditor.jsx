@@ -81,8 +81,7 @@ const NoteEditor = forwardRef(({ content, onChange, onSelectionChange, readOnly 
         {/* CursorOverlay sits over the entire editor area */}
         <CursorOverlay quillRef={quillRef} users={users || []} />
       </div>
-      
-      <style>{`
+         <style>{`
         .quill {
           flex: 1;
           display: flex;
@@ -91,6 +90,7 @@ const NoteEditor = forwardRef(({ content, onChange, onSelectionChange, readOnly 
         .quill .ql-container {
           flex: 1;
           overflow: auto;
+          min-height: 0;
           font-family: 'Inter', sans-serif;
           font-size: 1.1rem;
           line-height: 1.8;
@@ -116,6 +116,20 @@ const NoteEditor = forwardRef(({ content, onChange, onSelectionChange, readOnly 
           min-height: 100%;
           outline: none;
           position: relative;
+        }
+        .ql-editor img {
+          max-width: 100%;
+          height: auto;
+          border-radius: var(--radius-lg);
+          margin: 2rem 0;
+          box-shadow: var(--shadow-lg);
+          transition: all 0.4s var(--ease-out-expo);
+          cursor: pointer;
+          display: block;
+        }
+        .ql-editor img:hover {
+          transform: translateY(-4px);
+          box-shadow: var(--shadow-xl), var(--shadow-glow);
         }
         .quill .ql-editor.ql-blank::before {
           color: var(--text-secondary);

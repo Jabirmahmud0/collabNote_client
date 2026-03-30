@@ -181,7 +181,7 @@ const EditorPage = () => {
       )}
 
       {/* Editor */}
-      <div className="flex-1 overflow-hidden relative">
+      <div className="flex-1 min-h-0 overflow-hidden relative">
         <NoteEditor 
           ref={editorRef}
           content={content} 

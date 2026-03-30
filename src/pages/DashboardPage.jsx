@@ -159,7 +159,7 @@ const DashboardPage = () => {
         onCreateNote={handleCreateNote}
       />
 
-      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden relative z-10">
         <Topbar searchQuery={searchQuery} onSearchChange={setSearchQuery} onCreateNote={handleCreateNote} />
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-8">
