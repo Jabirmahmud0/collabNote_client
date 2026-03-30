@@ -29,7 +29,6 @@ const EditorPage = () => {
   const [shareEmail, setShareEmail] = useState('');
   const [sharePermission, setSharePermission] = useState('edit');
   const [saveTimeout, setSaveTimeout] = useState(null);
-  const isRemoteChange = useRef(false);
   const typingTimeoutRef = useRef(null);
 
   useEffect(() => { loadNote(); }, [id]);
@@ -44,15 +43,22 @@ const EditorPage = () => {
     
     const handleNoteUpdate = ({ delta, userId }) => {
       // Don't apply your own changes
-      if (userId === user?.id) return;
+      const myId = user?.id || user?._id;
+      if (userId === myId) return;
       
-      console.log('Applying remote update from:', userId);
-      
-      // Mark as remote change to prevent save loop
-      isRemoteChange.current = true;
-      
-      // Simply replace the content with the remote content
-      setContent(delta);
+      // Apply the delta directly to the editor instance for smoothness
+      // and to preserve the local cursor position/history
+      if (editorRef.current) {
+        const editor = editorRef.current.getEditor();
+        if (editor) {
+          // Applying with default 'api' source. NoteEditor will pass this source 
+          // to handleContentChange, which will ignore it.
+          editor.updateContents(delta);
+          
+          // Also update our local state to reflect the latest content
+          setContent(editor.getContents());
+        }
+      }
     };
     
     socket.on('note-update', handleNoteUpdate);
@@ -68,10 +74,9 @@ const EditorPage = () => {
     } catch { toast.error('Failed to load note'); navigate('/dashboard'); }
   };
 
-  const handleContentChange = useCallback((fullContent) => {
-    // Skip if this is a remote change (to prevent loops)
-    if (isRemoteChange.current) {
-      isRemoteChange.current = false;
+  const handleContentChange = useCallback((fullContent, delta, source) => {
+    // Only send updates triggered by the user to avoid loops
+    if (source !== 'user') {
       return;
     }
     
@@ -81,9 +86,9 @@ const EditorPage = () => {
     setIsSaving(true);
     setIsSaved(false);
     
-    // Send socket update with full content
-    if (socket) {
-      sendNoteChange(id, fullContent);
+    // Send socket update with partial delta (much more efficient and preserves cursors)
+    if (socket && delta) {
+      sendNoteChange(id, delta);
       sendTyping(id);
       
       if (typingTimeoutRef.current) {
@@ -109,7 +114,8 @@ const EditorPage = () => {
   const handleTitleChange = useCallback((t) => setTitle(t), []);
 
   const handleSelectionChange = useCallback((range, source) => {
-    if (source === 'user' && socket) {
+    // Send cursor update for both 'user' (direct selection change) and 'silent' (typing)
+    if (socket && range) {
       sendCursorMove(id, range);
     }
   }, [id, socket, sendCursorMove]);

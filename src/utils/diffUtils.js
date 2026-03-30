@@ -158,6 +158,14 @@ export const getDiffSummary = (detailedDiff) => {
     density: totalLines > 0 ? ((changedLines / totalLines) * 100).toFixed(1) : 0
   };
 };
+/**
+ * Get the logical state of the diff (empty, identical, or changed)
+ */
+export const getDiffState = (text1, text2) => {
+  if (!text1 && !text2) return 'empty';
+  if (text1 === text2) return 'identical';
+  return 'changed';
+};
 
 /**
  * @deprecated Use compareTextsDetailed for newer UI

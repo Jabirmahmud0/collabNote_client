@@ -13,6 +13,10 @@ const NoteEditor = forwardRef(({ content, onChange, onSelectionChange, readOnly 
     container: quillRef.current?.container,
   }));
 
+  // Note: selection changes are handled exclusively via onChangeSelection prop below.
+  // Do NOT add a direct editor.on('selection-change') listener here — it would
+  // fire twice per user action and send duplicate cursor-move socket events.
+
   const modules = {
     toolbar: [
       [{ header: [1, 2, 3, false] }],
@@ -42,12 +46,12 @@ const NoteEditor = forwardRef(({ content, onChange, onSelectionChange, readOnly 
 
   const handleTextChange = useCallback((content, delta, source, editor) => {
     if (source === 'user') {
-      // Get the full document state
       const fullContent = editor.getContents();
-
       if (onChange) {
-        onChange(fullContent);
+        onChange(fullContent, delta, source);
       }
+      // Do NOT call onSelectionChange here — onChangeSelection prop handles it.
+      // Calling it here duplicates cursor-move socket events on every keystroke.
     }
   }, [onChange]);
 
@@ -67,7 +71,7 @@ const NoteEditor = forwardRef(({ content, onChange, onSelectionChange, readOnly 
           theme="snow"
           value={content}
           onChange={handleTextChange}
-          onSelectionChange={handleSelectionChange}
+          onChangeSelection={handleSelectionChange}
           modules={modules}
           formats={formats}
           readOnly={readOnly}
@@ -111,6 +115,7 @@ const NoteEditor = forwardRef(({ content, onChange, onSelectionChange, readOnly 
           padding: 4rem max(2rem, calc((100% - 800px) / 2)) !important;
           min-height: 100%;
           outline: none;
+          position: relative;
         }
         .quill .ql-editor.ql-blank::before {
           color: var(--text-secondary);

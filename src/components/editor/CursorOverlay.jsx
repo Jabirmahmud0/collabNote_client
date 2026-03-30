@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { useSocketContext } from '../../context/SocketContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../../hooks/useAuth';
 
 /**
  * A single remote user's cursor.
@@ -33,7 +33,7 @@ const LiveCursor = ({ user, quillEditor }) => {
     };
 
     updatePosition();
-    
+
     // Smooth update for rapid typing or window resizing
     const interval = setInterval(updatePosition, 100);
     return () => clearInterval(interval);
@@ -49,10 +49,10 @@ const LiveCursor = ({ user, quillEditor }) => {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.5 }}
       transition={{ duration: 0.2 }}
-      style={{ 
+      style={{
         position: 'absolute',
-        left: pos.x, 
-        top: pos.y, 
+        left: pos.x,
+        top: pos.y,
         zIndex: 5000,
         pointerEvents: 'none'
       }}
@@ -67,22 +67,23 @@ const LiveCursor = ({ user, quillEditor }) => {
           animation: 'cursorBlink 1s step-end infinite',
         }}
       />
-      
+
       {/* Label */}
       <div
         style={{
           position: 'absolute',
-          top: -22,
+          top: -24, // Slightly higher to clear the caret
           left: 0,
           backgroundColor: user.color,
           color: 'white',
           fontSize: '11px',
           fontWeight: '700',
           padding: '2px 8px',
-          borderRadius: '4px',
+          borderRadius: '4px 4px 4px 0', // Nice speech bubble effect
           whiteSpace: 'nowrap',
           boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
-          fontFamily: 'Inter, sans-serif'
+          fontFamily: 'Inter, sans-serif',
+          zIndex: 5001,
         }}
       >
         {displayName}
@@ -92,10 +93,9 @@ const LiveCursor = ({ user, quillEditor }) => {
 };
 
 const CursorOverlay = ({ quillRef, users }) => {
-  const { socket } = useSocketContext();
-  const [cursors, setCursors] = useState({});
   const [editorInstance, setEditorInstance] = useState(null);
   const [containerEl, setContainerEl] = useState(null);
+  const { user } = useAuth();
 
   // Initialize editor and container
   useEffect(() => {
@@ -113,68 +113,20 @@ const CursorOverlay = ({ quillRef, users }) => {
     return () => clearInterval(timer);
   }, [quillRef]);
 
-  // Handle socket events
-  useEffect(() => {
-    if (!socket) return;
-
-    const onCursorUpdate = (data) => {
-      const { userId, range, color, name } = data;
-      if (!userId) return;
-
-      if (!range) {
-        setCursors(prev => {
-          const next = { ...prev };
-          delete next[userId];
-          return next;
-        });
-      } else {
-        setCursors(prev => ({
-          ...prev,
-          [userId]: { userId, range, color, name }
-        }));
-      }
-    };
-
-    socket.on('cursor-update', onCursorUpdate);
-    return () => socket.off('cursor-update', onCursorUpdate);
-  }, [socket]);
-
-  // Sync with active users list and initialize from props
-  useEffect(() => {
-    const activeUserIds = new Set(users.map(u => u.userId));
-    
-    setCursors(prev => {
-      const next = { ...prev };
-      let changed = false;
-
-      // Add/Update from users prop
-      users.forEach(u => {
-        if (u.userId !== socket?.id && u.range) { // Skip self
-          if (!next[u.userId] || JSON.stringify(next[u.userId].range) !== JSON.stringify(u.range)) {
-            next[u.userId] = { 
-              userId: u.userId, 
-              range: u.range, 
-              color: u.color, 
-              name: u.userName || u.name 
-            };
-            changed = true;
-          }
-        }
-      });
-
-      // Remove inactive
-      for (const id in next) {
-        if (!activeUserIds.has(id)) {
-          delete next[id];
-          changed = true;
-        }
-      }
-
-      return changed ? next : prev;
-    });
-  }, [users, socket]);
-
   if (!containerEl || !editorInstance) return null;
+
+  const myUserId = user?.id || user?._id;
+
+  // Filter out local user and users without range
+  const remoteCursors = users.filter(u => {
+    const uid = u.userId || u.id;
+    // Filter out local user
+    if (myUserId && uid && String(uid).trim() === String(myUserId).trim()) {
+      return false;
+    }
+    // Only show cursors that have a range (selection)
+    return u.range && u.range.index !== null && u.range.index !== undefined;
+  });
 
   return createPortal(
     <>
@@ -184,19 +136,27 @@ const CursorOverlay = ({ quillRef, users }) => {
           50% { opacity: 0; }
         }
       `}</style>
-      <div 
+      <div
         className="ql-cursors-overlay"
+        contentEditable={false}
+        suppressContentEditableWarning={true}
         style={{
           position: 'absolute',
-          inset: 0,
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
           pointerEvents: 'none',
           zIndex: 5000,
-          overflow: 'hidden'
         }}
       >
         <AnimatePresence>
-          {Object.values(cursors).map(c => (
-            <LiveCursor key={c.userId} user={c} quillEditor={editorInstance} />
+          {remoteCursors.map(c => (
+            <LiveCursor
+              key={c.socketId || c.userId}
+              user={c}
+              quillEditor={editorInstance}
+            />
           ))}
         </AnimatePresence>
       </div>

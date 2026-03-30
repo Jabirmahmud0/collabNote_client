@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from '../hooks/useAuth';
 
@@ -17,6 +17,13 @@ export const SocketProvider = ({ children }) => {
   const [connected, setConnected] = useState(false);
   const [users, setUsers] = useState([]);
   const { user } = useAuth();
+  // Keep a ref to myId so socket event closures always see the latest value
+  const myIdRef = useRef(null);
+
+  useEffect(() => {
+    const id = user?.id || user?._id;
+    myIdRef.current = id ? String(id) : null;
+  }, [user]);
 
   useEffect(() => {
     if (!user) {
@@ -36,38 +43,79 @@ export const SocketProvider = ({ children }) => {
     });
 
     newSocket.on('connect', () => {
-      console.log('Socket connected:', newSocket.id);
       setConnected(true);
 
       // Register this user globally so server can send us targeted events
       // (e.g., note-shared notifications)
-      console.log('[SOCKET] Registering user:', user.id);
       newSocket.emit('register-user', { userId: user.id });
     });
 
+
     newSocket.on('disconnect', () => {
-      console.log('Socket disconnected');
       setConnected(false);
     });
 
     newSocket.on('new-notification', (notification) => {
-      console.log('[SOCKET] Received new-notification event:', notification);
     });
 
-    newSocket.on('room-users', (users) => {
-      setUsers(users);
+    newSocket.on('room-users', (roomUsers) => {
+      const seen = new Map();
+      for (const u of roomUsers) {
+        const uid = u.userId || u.id;
+        const key = u.socketId || String(uid).trim();
+        if (!seen.has(key)) seen.set(key, u);
+      }
+      setUsers(Array.from(seen.values()));
     });
 
-    newSocket.on('user-joined', ({ userId, userName, color }) => {
-      console.log(`${userName} joined`);
-      setUsers((prev) => [
-        ...prev.filter((u) => u.userId !== userId), // avoid duplicates
-        { userId, userName, color },
-      ]);
+    newSocket.on('user-joined', (userData) => {
+      setUsers((prev) => {
+        // Filter out any stale entries for this user
+        const filtered = prev.filter(
+          (u) => u.socketId !== userData.socketId && String(u.userId || u.id).trim() !== String(userData.userId || userData.id).trim()
+        );
+        return [...filtered, { ...userData, range: null }];
+      });
     });
 
-    newSocket.on('user-left', ({ userId }) => {
-      setUsers((prev) => prev.filter((u) => u.userId !== userId));
+    newSocket.on('cursor-update', (data) => {
+      const { userId, socketId, range, color, name } = data;
+      const uid = userId || data.id;
+
+      setUsers((prev) => {
+        // Try to find existing user by socketId
+        const idx = prev.findIndex((u) => u.socketId === socketId);
+        if (idx !== -1) {
+          const next = [...prev];
+          next[idx] = { ...next[idx], range, color, userName: name || next[idx].userName };
+          return next;
+        }
+
+        // Try to find by userId (for cases where socketId changed)
+        const uidIdx = prev.findIndex((u) => {
+          const u_uid = u.userId || u.id;
+          return uid && u_uid && String(u_uid).trim() === String(uid).trim();
+        });
+
+        if (uidIdx !== -1) {
+          const next = [...prev];
+          next[uidIdx] = { ...next[uidIdx], socketId, range, color, userName: name || next[uidIdx].userName };
+          return next;
+        }
+
+        // User not found, add them (they might have joined before we started tracking)
+        return [...prev, {
+          userId: uid,
+          socketId,
+          range,
+          color,
+          userName: name || 'Anonymous',
+        }];
+      });
+    });
+
+    newSocket.on('user-left', ({ socketId }) => {
+      setUsers((prev) => prev.filter((u) => u.socketId !== socketId));
     });
 
     setSocket(newSocket);
@@ -79,10 +127,11 @@ export const SocketProvider = ({ children }) => {
 
   const joinRoom = (noteId) => {
     if (!socket || !user) return;
-
+    // Clear stale presence from any previous room before joining new one
+    setUsers([]);
     socket.emit('join-room', {
       noteId,
-      userId: user.id,
+      userId: user.id || user._id,
       userName: user.name,
       userColor: getRandomColor(),
     });
@@ -93,7 +142,7 @@ export const SocketProvider = ({ children }) => {
 
     socket.emit('leave-room', {
       noteId,
-      userId: user?.id,
+      userId: user?.id || user?._id, // Add fallback
     });
     setUsers([]);
   };
@@ -104,16 +153,15 @@ export const SocketProvider = ({ children }) => {
     socket.emit('note-change', {
       noteId,
       delta,
-      userId: user?.id,
+      userId: user?.id || user?._id, // Add fallback
     });
   };
 
   const sendCursorMove = (noteId, range) => {
     if (!socket) return;
-
     socket.emit('cursor-move', {
       noteId,
-      userId: user?.id,
+      userId: user?.id || user?._id, // Add fallback
       range,
       userName: user?.name,
     });
@@ -124,7 +172,7 @@ export const SocketProvider = ({ children }) => {
 
     socket.emit('user-typing', {
       noteId,
-      userId: user?.id,
+      userId: user?.id || user?._id, // Add fallback
       userName: user?.name,
     });
   };
@@ -134,7 +182,7 @@ export const SocketProvider = ({ children }) => {
 
     socket.emit('user-stop-typing', {
       noteId,
-      userId: user?.id,
+      userId: user?.id || user?._id, // Add fallback
     });
   };
 
