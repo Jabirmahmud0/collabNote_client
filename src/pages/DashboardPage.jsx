@@ -147,7 +147,7 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="h-screen flex bg-bg-primary overflow-hidden">
+    <div className="h-[100dvh] flex bg-bg-primary overflow-hidden">
       <div className="mesh-bg opacity-20 pointer-events-none" />
 
       <Sidebar

@@ -160,7 +160,7 @@ const EditorPage = () => {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-bg-primary overflow-hidden">
+    <div className="h-[100dvh] flex flex-col bg-bg-primary overflow-hidden">
       <div className="mesh-bg opacity-10 pointer-events-none" />
 
       {/* Toolbar */}
