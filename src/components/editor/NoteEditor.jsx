@@ -86,14 +86,12 @@ const NoteEditor = forwardRef(({ content, onChange, onSelectionChange, readOnly 
           height: 100%;
           display: flex;
           flex-direction: column;
-          overflow: hidden;
         }
         .quill .ql-container {
           flex: 1;
           display: flex;
           flex-direction: column;
           min-height: 0;
-          overflow: hidden;
           font-family: 'Inter', sans-serif;
           font-size: 1.1rem;
           line-height: 1.8;
@@ -114,13 +112,15 @@ const NoteEditor = forwardRef(({ content, onChange, onSelectionChange, readOnly 
         }
         .quill .ql-editor {
           flex: 1;
-          overflow-y: auto !important;
           color: var(--text-primary);
-          padding: 1rem max(2rem, calc((100% - 800px) / 2)) !important; /* Reduced top padding for better flow */
-          padding-top: 4rem !important;
+          padding: 2rem 8% !important;
+          max-width: 900px;
+          margin: 0 auto;
           outline: none;
           position: relative;
-          height: 100%;
+          min-height: 100%;
+          border-left: 1px solid var(--border);
+          border-right: 1px solid var(--border);
         }
         .ql-editor img {
 
@@ -140,8 +140,8 @@ const NoteEditor = forwardRef(({ content, onChange, onSelectionChange, readOnly 
         .quill .ql-editor.ql-blank::before {
           color: var(--text-secondary);
           opacity: 0.3;
-          left: max(2rem, calc((100% - 800px) / 2)) !important;
-          padding: 4rem 0 !important;
+          left: 8% !important;
+          right: 8% !important;
           font-style: normal;
         }
         
