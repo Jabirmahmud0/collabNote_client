@@ -9,11 +9,18 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import toast from 'react-hot-toast';
 
+const DEMO_EMAIL = 'jabirbhaaii2@gmail.com';
+const DEMO_PASSWORD = '12345678';
+
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [formData, setFormData] = useState({
+    name: '',
+    email: DEMO_EMAIL,
+    password: DEMO_PASSWORD,
+  });
   const [errors, setErrors] = useState({});
   const { login, register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
@@ -27,6 +34,30 @@ const AuthPage = () => {
     else if (formData.password.length < 6) newErrors.password = 'Min 6 characters';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleDemoLogin = async () => {
+    setFormData((prev) => ({
+      ...prev,
+      email: DEMO_EMAIL,
+      password: DEMO_PASSWORD,
+    }));
+    setLoading(true);
+    try {
+      await login(DEMO_EMAIL, DEMO_PASSWORD);
+      toast.success('Logged in as Demo User!');
+      navigate('/dashboard');
+    } catch (error) {
+      if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+        toast.error('Server took too long to respond. If it was sleeping, please try again.');
+      } else if (!error.response) {
+        toast.error('Unable to reach server. Please check your connection or try again shortly.');
+      } else {
+        toast.error(error.response?.data?.message || 'Authentication failed');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -201,18 +232,40 @@ const AuthPage = () => {
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               />
               <button
-                onClick={() => { setIsLogin(true); setErrors({}); }}
+                onClick={() => {
+                  setIsLogin(true);
+                  setErrors({});
+                  setFormData((prev) => ({
+                    ...prev,
+                    email: prev.email || DEMO_EMAIL,
+                    password: prev.password || DEMO_PASSWORD,
+                  }));
+                }}
                 className={`relative flex-1 py-2.5 text-xs font-semibold transition-colors z-10 rounded-lg ${isLogin ? 'text-white' : 'text-text-muted hover:text-text-primary'}`}
               >
                 Sign In
               </button>
               <button
-                onClick={() => { setIsLogin(false); setErrors({}); }}
+                onClick={() => {
+                  setIsLogin(false);
+                  setErrors({});
+                  setFormData({ name: '', email: '', password: '' });
+                }}
                 className={`relative flex-1 py-2.5 text-xs font-semibold transition-colors z-10 rounded-lg ${!isLogin ? 'text-white' : 'text-text-muted hover:text-text-primary'}`}
               >
                 Sign Up
               </button>
             </div>
+
+            {/* Demo user hint */}
+            {isLogin && (
+              <div className="mb-4 flex items-center justify-between px-3 py-2 bg-accent/10 border border-accent/20 rounded-xl text-xs text-text-secondary">
+                <span className="flex items-center gap-1.5 text-accent font-medium">
+                  <Sparkles className="w-3.5 h-3.5" /> Demo credentials prefilled
+                </span>
+                <span className="text-[10px] text-text-muted font-mono">1-click login below</span>
+              </div>
+            )}
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -280,6 +333,21 @@ const AuthPage = () => {
                 {isLogin ? 'Sign In' : 'Create Account'}
               </Button>
             </form>
+
+            {/* Quick Demo Login */}
+            {isLogin && (
+              <Button
+                type="button"
+                variant="outline"
+                size="md"
+                className="w-full mt-3 border-accent/40 text-accent hover:bg-accent/10 hover:text-white"
+                onClick={handleDemoLogin}
+                loading={loading}
+                icon={<Sparkles className="w-4 h-4 text-accent" />}
+              >
+                Login as Demo User
+              </Button>
+            )}
 
             {/* Divider */}
             <div className="relative my-6">
