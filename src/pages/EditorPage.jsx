@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import { useNotes } from '../hooks/useNotes';
 import { useSocket } from '../hooks/useSocket';
 import { useAuth } from '../hooks/useAuth';
@@ -31,7 +31,21 @@ const EditorPage = () => {
   const [saveTimeout, setSaveTimeout] = useState(null);
   const typingTimeoutRef = useRef(null);
 
-  useEffect(() => { loadNote(); }, [id]);
+  const loadNote = useCallback(async () => {
+    try {
+      const noteData = await getNote(id);
+      setNote(noteData);
+      setTitle(noteData.title || 'Untitled');
+      setContent(noteData.content || { ops: [] });
+    } catch {
+      toast.error('Failed to load note');
+      navigate('/dashboard');
+    }
+  }, [getNote, id, navigate]);
+
+  // The async loader updates state after the external request resolves.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { loadNote(); }, [loadNote]);
 
   useEffect(() => {
     if (note && socket) joinRoom(id);
@@ -64,15 +78,6 @@ const EditorPage = () => {
     socket.on('note-update', handleNoteUpdate);
     return () => { socket.off('note-update', handleNoteUpdate); };
   }, [socket, user]);
-
-  const loadNote = async () => {
-    try {
-      const noteData = await getNote(id);
-      setNote(noteData);
-      setTitle(noteData.title || 'Untitled');
-      setContent(noteData.content || { ops: [] });
-    } catch { toast.error('Failed to load note'); navigate('/dashboard'); }
-  };
 
   const handleContentChange = useCallback((fullContent, delta, source) => {
     // Only send updates triggered by the user to avoid loops
@@ -113,7 +118,7 @@ const EditorPage = () => {
 
   const handleTitleChange = useCallback((t) => setTitle(t), []);
 
-  const handleSelectionChange = useCallback((range, source) => {
+  const handleSelectionChange = useCallback((range) => {
     // Send cursor update for both 'user' (direct selection change) and 'silent' (typing)
     if (socket && range) {
       sendCursorMove(id, range);
@@ -154,7 +159,7 @@ const EditorPage = () => {
   if (!note) {
     return (
       <div className="h-screen flex items-center justify-center bg-bg-primary">
-        <motion.div className="w-8 h-8 rounded-full border-2 border-border border-t-accent" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} />
+        <Motion.div className="w-8 h-8 rounded-full border-2 border-border border-t-accent" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} />
       </div>
     );
   }
@@ -167,6 +172,7 @@ const EditorPage = () => {
       <Toolbar
         title={title}
         onTitleChange={handleTitleChange}
+        onTitleBlur={handleTitleBlur}
         isSaving={isSaving}
         isSaved={isSaved}
         onShare={handleShare}
@@ -181,7 +187,7 @@ const EditorPage = () => {
       )}
 
       {/* Editor */}
-      <div className="flex-1 min-h-0 overflow-y-auto relative">
+      <div className="flex-1 min-h-0 overflow-y-auto relative custom-scrollbar">
         <NoteEditor
           ref={editorRef}
           content={content}

@@ -1,11 +1,12 @@
 import React from 'react';
-import { Save, Share2, Download, MoreVertical } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Save, Share2, Download } from 'lucide-react';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import Button from '../ui/Button';
 
 const Toolbar = ({
   title,
   onTitleChange,
+  onTitleBlur,
   isSaving,
   isSaved,
   onShare,
@@ -14,20 +15,25 @@ const Toolbar = ({
   const [showExportMenu, setShowExportMenu] = React.useState(false);
 
   return (
-    <div className="h-20 bg-bg-primary/80 backdrop-blur-2xl border-b border-border flex items-center justify-between px-8 md:px-12 relative z-20">
+    <div className="min-h-16 md:min-h-20 bg-bg-primary/80 backdrop-blur-2xl border-b border-border flex items-center justify-between gap-4 px-4 md:px-8 lg:px-12 py-3 relative z-30">
       {/* Left: Title */}
       <div className="flex-1 max-w-2xl">
         <input
           type="text"
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
+          onBlur={onTitleBlur}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') e.currentTarget.blur();
+          }}
+          aria-label="Note title"
           placeholder="Untitled workspace item"
-          className="w-full bg-transparent text-2xl font-black text-text-primary placeholder-text-muted/40 focus:outline-none tracking-tighter"
+          className="w-full bg-transparent text-xl md:text-2xl font-black text-text-primary placeholder-text-muted/40 focus:outline-none tracking-tighter"
         />
       </div>
 
       {/* Right: Actions */}
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-2 md:gap-5">
         {/* Save Status */}
         <div className="flex items-center gap-3">
           {isSaving ? (
@@ -36,25 +42,25 @@ const Toolbar = ({
               <span className="text-[10px] font-black uppercase tracking-widest text-accent">Syncing</span>
             </div>
           ) : isSaved ? (
-            <motion.div 
+            <Motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 className="flex items-center gap-2 py-1.5 px-3 bg-emerald-500/10 border border-emerald-500/20 rounded-full"
             >
               <Save className="w-3.5 h-3.5 text-emerald-500" />
               <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Secured</span>
-            </motion.div>
+            </Motion.div>
           ) : null}
         </div>
 
-        <div className="h-8 w-px bg-border mx-2" />
+        <div className="hidden sm:block h-8 w-px bg-border mx-1" />
 
         <div className="flex items-center gap-3">
             {/* Share Button */}
             <Button
               variant="primary"
               onClick={onShare}
-              className="flex items-center gap-2.5 px-6 py-2.5 font-black text-xs uppercase tracking-widest shadow-xl shadow-accent/20"
+              className="flex items-center gap-2.5 px-3 md:px-6 py-2.5 font-black text-xs uppercase tracking-widest shadow-xl shadow-accent/20"
             >
               <Share2 className="w-4 h-4" />
               <span className="hidden md:inline">Invite Collaborators</span>
@@ -65,6 +71,9 @@ const Toolbar = ({
             <div className="relative">
               <button
                 onClick={() => setShowExportMenu(!showExportMenu)}
+                aria-label="Export note"
+                aria-expanded={showExportMenu}
+                title="Export note"
                 className="w-11 h-11 flex items-center justify-center rounded-2xl bg-bg-secondary border border-border text-text-muted hover:text-text-primary hover:bg-hover transition-all active:scale-90"
               >
                 <Download className="w-5 h-5" />
@@ -77,7 +86,7 @@ const Toolbar = ({
                       className="fixed inset-0 z-10"
                       onClick={() => setShowExportMenu(false)}
                     />
-                    <motion.div 
+                    <Motion.div 
                         initial={{ opacity: 0, scale: 0.95, y: 10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -113,7 +122,7 @@ const Toolbar = ({
                         <div className="w-2 h-2 rounded-full bg-accent" />
                         Export as JSON
                       </button>
-                    </motion.div>
+                    </Motion.div>
                   </>
                 )}
               </AnimatePresence>

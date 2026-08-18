@@ -1,11 +1,19 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+// Keep the animation namespace visible to static analysis; JSX uses motion.div members below.
+void motion;
 import {
   Users, Sparkles, History, Github, Linkedin, ArrowRight,
   Play, Zap, Shield, Globe, ChevronRight,
 } from 'lucide-react';
 import Button from '../components/ui/Button';
+import {
+  IntelligenceSection,
+  ProductPromise,
+  UseCasesSection,
+  WorkflowSection,
+} from '../components/landing/LandingSections';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -56,7 +64,8 @@ const LandingPage = () => {
           </div>
           <div className="flex items-center gap-8">
             <a href="#features" className="hidden md:block text-sm text-text-secondary hover:text-text-primary transition-colors">Features</a>
-            <a href="#tech" className="hidden md:block text-sm text-text-secondary hover:text-text-primary transition-colors">Stack</a>
+            <a href="#workflow" className="hidden lg:block text-sm text-text-secondary hover:text-text-primary transition-colors">Workflow</a>
+            <a href="#use-cases" className="hidden lg:block text-sm text-text-secondary hover:text-text-primary transition-colors">Use cases</a>
             <Button variant="primary" size="sm" onClick={() => navigate('/auth')}>
               Get Started <ArrowRight className="w-3.5 h-3.5 ml-1" />
             </Button>
@@ -260,6 +269,8 @@ const LandingPage = () => {
       </section>
 
       {/* ═══════════════ FEATURES ═══════════════ */}
+      <ProductPromise />
+
       <section id="features" className="py-32 px-6 relative">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-20">
@@ -319,6 +330,10 @@ const LandingPage = () => {
       </section>
 
       {/* ═══════════════ STATS ═══════════════ */}
+      <WorkflowSection />
+      <IntelligenceSection />
+      <UseCasesSection />
+
       <section className="py-24 px-6 relative">
         <div className="max-w-5xl mx-auto">
           <motion.div
