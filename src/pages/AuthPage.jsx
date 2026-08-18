@@ -180,7 +180,7 @@ const AuthPage = () => {
       </div>
 
       {/* ═══ Right Panel — Auth Form ═══ */}
-      <div className="w-full lg:w-[480px] xl:w-[560px] shrink-0 flex items-center justify-center p-6 relative bg-bg-primary">
+      <div className="w-full lg:w-[480px] xl:w-[560px] shrink-0 flex items-center justify-center p-6 relative bg-bg-primary overflow-y-auto h-screen">
         <div className="noise-overlay" />
 
         {/* Back button */}
