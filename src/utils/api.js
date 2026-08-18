@@ -2,9 +2,10 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-// Create axios instance
+// Create axios instance with timeout
 const api = axios.create({
   baseURL: API_URL,
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -16,7 +17,6 @@ api.interceptors.request.use(
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      // Debug: log token info (decode without verification)
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
         console.log('[API] Request token user:', payload.id, 'exp:', new Date(payload.exp * 1000).toISOString());
@@ -35,24 +35,32 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // If error is 401 and we haven't retried yet
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const isAuthRoute =
+      originalRequest?.url?.includes('/api/auth/login') ||
+      originalRequest?.url?.includes('/api/auth/register') ||
+      originalRequest?.url?.includes('/api/auth/google') ||
+      originalRequest?.url?.includes('/api/auth/refresh');
+
+    // If error is 401 and we haven't retried yet and it's not an auth route
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) {
       originalRequest._retry = true;
 
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         
         if (!refreshToken) {
-          // No refresh token, redirect to auth
           localStorage.removeItem('accessToken');
-          window.location.href = '/auth';
+          localStorage.removeItem('refreshToken');
+          if (window.location.pathname !== '/auth' && window.location.pathname !== '/') {
+            window.location.href = '/auth';
+          }
           return Promise.reject(error);
         }
 
-        // Try to refresh the token
+        // Try to refresh the token using a clean axios instance call
         const response = await axios.post(`${API_URL}/api/auth/refresh`, {
           refreshToken,
-        });
+        }, { timeout: 15000 });
 
         const { accessToken } = response.data.data;
         localStorage.setItem('accessToken', accessToken);
@@ -61,10 +69,11 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
-        // Refresh failed, redirect to auth
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        window.location.href = '/auth';
+        if (window.location.pathname !== '/auth' && window.location.pathname !== '/') {
+          window.location.href = '/auth';
+        }
         return Promise.reject(refreshError);
       }
     }

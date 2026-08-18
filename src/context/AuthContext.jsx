@@ -28,18 +28,18 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      // Decode token to get user info (simple JWT decode)
-      const decoded = JSON.parse(atob(token.split('.')[1]));
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        throw new Error('Invalid token format');
+      }
+      const decoded = JSON.parse(atob(parts[1]));
 
       // Check if token is expired
       if (decoded.exp * 1000 < Date.now()) {
-        // Token expired, try to refresh
         const refreshed = await refreshAccessToken();
         if (!refreshed) {
-          // Refresh failed, clear auth state
           setUser(null);
         }
-        setLoading(false);
         return;
       }
 
@@ -68,18 +68,21 @@ export const AuthProvider = ({ children }) => {
       }
 
       const response = await api.post('/api/auth/refresh', { refreshToken });
-      const { accessToken } = response.data.data;
+      const { accessToken } = response.data?.data || {};
+      if (!accessToken) return false;
 
       localStorage.setItem('accessToken', accessToken);
 
-      // Update user state directly with new token info
-      const decoded = JSON.parse(atob(accessToken.split('.')[1]));
-      setUser({
-        id: decoded.id,
-        name: localStorage.getItem('userName') || '',
-        email: localStorage.getItem('userEmail') || '',
-        avatar: localStorage.getItem('userAvatar') || '',
-      });
+      const parts = accessToken.split('.');
+      if (parts.length === 3) {
+        const decoded = JSON.parse(atob(parts[1]));
+        setUser({
+          id: decoded.id,
+          name: localStorage.getItem('userName') || '',
+          email: localStorage.getItem('userEmail') || '',
+          avatar: localStorage.getItem('userAvatar') || '',
+        });
+      }
       
       return true;
     } catch (error) {

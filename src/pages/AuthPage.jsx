@@ -43,7 +43,13 @@ const AuthPage = () => {
       }
       navigate('/dashboard');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Something went wrong');
+      if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+        toast.error('Server took too long to respond. If it was sleeping, please try again.');
+      } else if (!error.response) {
+        toast.error('Unable to reach server. Please check your connection or try again shortly.');
+      } else {
+        toast.error(error.response?.data?.message || 'Authentication failed');
+      }
     } finally {
       setLoading(false);
     }
@@ -53,12 +59,10 @@ const AuthPage = () => {
     try {
       setLoading(true);
       
-      // Clear any existing tokens and sign out from Firebase first
       localStorage.clear();
       await signOut(auth);
       
       const result = await signInWithPopup(auth, googleProvider);
-
       const { displayName, email, uid, photoURL } = result.user;
 
       await loginWithGoogle(displayName, email, uid, photoURL);
@@ -66,8 +70,16 @@ const AuthPage = () => {
       toast.success('Google sign-in successful!');
       navigate('/dashboard');
     } catch (error) {
-      console.error('Google login error:', error);
-      toast.error(error.message || 'Failed to authenticate with Google');
+      if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+        return;
+      }
+      if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+        toast.error('Server took too long to respond. Please try again.');
+      } else if (!error.response && error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error(error.response?.data?.message || 'Failed to authenticate with Google');
+      }
     } finally {
       setLoading(false);
     }
