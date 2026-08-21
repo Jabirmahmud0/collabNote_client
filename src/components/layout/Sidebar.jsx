@@ -5,6 +5,7 @@ import {
   FileText, Share2, Trash2, Plus, ChevronDown, ChevronRight,
   LayoutDashboard, Settings, Wrench, PanelLeftClose, PanelLeft,
 } from 'lucide-react';
+import { Logo, LogoIcon } from '../ui/Logo';
 
 const Sidebar = ({
   filter = 'all',
@@ -35,17 +36,10 @@ const Sidebar = ({
       {/* Header */}
       <div className={`flex items-center ${collapsed ? 'justify-center px-3' : 'justify-between px-5'} h-16 border-b border-border`}>
         <Link to="/dashboard" className="flex items-center gap-2.5 shrink-0">
-          <div className="w-8 h-8 bg-gradient-to-br from-accent to-accent-secondary rounded-lg flex items-center justify-center shadow-md shrink-0">
-            <span className="text-white font-bold text-[11px]">CN</span>
-          </div>
-          {!collapsed && (
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-base font-bold tracking-tight text-text-primary"
-            >
-              CollabNote
-            </motion.span>
+          {collapsed ? (
+            <LogoIcon size={30} />
+          ) : (
+            <Logo size="sm" showText={true} />
           )}
         </Link>
         {!collapsed && (

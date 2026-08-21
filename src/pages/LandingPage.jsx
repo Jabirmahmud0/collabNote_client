@@ -8,6 +8,7 @@ import {
   Play, Zap, Shield, Globe, ChevronRight,
 } from 'lucide-react';
 import Button from '../components/ui/Button';
+import Logo from '../components/ui/Logo';
 import {
   IntelligenceSection,
   ProductPromise,
@@ -56,11 +57,8 @@ const LandingPage = () => {
       {/* ═══════════════ NAVBAR ═══════════════ */}
       <nav className="fixed top-0 w-full z-50 glass-strong">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-accent to-accent-secondary rounded-xl flex items-center justify-center shadow-lg shadow-accent/20">
-              <span className="text-white font-extrabold text-xs">CN</span>
-            </div>
-            <span className="text-lg font-bold tracking-tight">CollabNote</span>
+          <div className="cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            <Logo size="sm" showText={true} />
           </div>
           <div className="flex items-center gap-8">
             <a href="#features" className="hidden md:block text-sm text-text-secondary hover:text-text-primary transition-colors">Features</a>
@@ -89,7 +87,7 @@ const LandingPage = () => {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
                 </span>
-                Powered by Gemini 1.5 Flash
+                Powered by Gemini 2.5 Flash
                 <ChevronRight className="w-3 h-3 text-accent/60" />
               </div>
             </motion.div>
@@ -466,12 +464,7 @@ const LandingPage = () => {
       {/* ═══════════════ FOOTER ═══════════════ */}
       <footer className="border-t border-border py-12 px-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 bg-gradient-to-br from-accent to-accent-secondary rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-[9px]">CN</span>
-            </div>
-            <span className="font-bold tracking-tight text-sm">CollabNote</span>
-          </div>
+          <Logo size="xs" showText={true} />
           <p className="text-xs text-text-muted">© 2026 CollabNote. Crafted with care.</p>
           <div className="flex gap-2">
             <a href="#" className="p-2 rounded-lg border border-border hover:border-accent/30 text-text-muted hover:text-accent transition-all">

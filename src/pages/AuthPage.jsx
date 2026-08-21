@@ -7,6 +7,7 @@ import { auth, googleProvider } from '../config/firebase';
 import { signInWithPopup, signOut } from 'firebase/auth';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import Logo from '../components/ui/Logo';
 import toast from 'react-hot-toast';
 
 const DEMO_EMAIL = 'jabirbhaaii2@gmail.com';
@@ -147,14 +148,8 @@ const AuthPage = () => {
       <div className="hidden lg:flex flex-1 relative flex-col justify-between p-12 xl:p-16 border-r border-border bg-gradient-to-b from-accent/5 via-transparent to-accent/[0.02] overflow-hidden">
         {/* Brand Header */}
         <div className="relative z-10 pt-4">
-          <div className="inline-flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-11 h-11 bg-gradient-to-br from-accent via-indigo-600 to-accent-secondary rounded-2xl flex items-center justify-center shadow-lg shadow-accent/25 ring-1 ring-white/20">
-              <span className="text-white font-black text-sm tracking-wider">CN</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-extrabold tracking-tight text-text-primary leading-none">CollabNote</span>
-              <span className="text-[11px] font-medium text-accent tracking-wide mt-1">Workspace Intelligence</span>
-            </div>
+          <div className="inline-flex items-center cursor-pointer" onClick={() => navigate('/')}>
+            <Logo size="lg" subtitle="Workspace Intelligence" />
           </div>
         </div>
 
@@ -232,11 +227,8 @@ const AuthPage = () => {
           className="w-full max-w-[440px] relative z-10 my-auto"
         >
           {/* Mobile Logo */}
-          <div className="lg:hidden text-center mb-8">
-            <div className="w-12 h-12 bg-gradient-to-br from-accent to-accent-secondary rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-accent/30 mb-3">
-              <span className="text-white font-extrabold text-sm">CN</span>
-            </div>
-            <h2 className="text-xl font-bold text-text-primary tracking-tight">CollabNote</h2>
+          <div className="lg:hidden text-center mb-8 flex justify-center cursor-pointer" onClick={() => navigate('/')}>
+            <Logo size="md" subtitle="Workspace Intelligence" />
           </div>
 
           {/* Form Header */}
@@ -255,7 +247,7 @@ const AuthPage = () => {
             <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-accent to-transparent opacity-70" />
 
             {/* Mode Switcher Tabs */}
-            <div className="flex relative mb-6 bg-bg-tertiary rounded-2xl p-1 border border-border">
+            <div className="flex relative mb-6 bg-slate-100 dark:bg-bg-tertiary rounded-2xl p-1 border border-border">
               <motion.div
                 layout
                 className="absolute inset-y-1 w-[calc(50%-4px)] bg-accent rounded-xl shadow-md shadow-accent/25"
@@ -276,7 +268,7 @@ const AuthPage = () => {
                   }));
                 }}
                 className={`relative flex-1 py-2.5 text-xs font-bold transition-colors z-10 rounded-xl ${
-                  isLogin ? 'text-white' : 'text-text-muted hover:text-text-primary'
+                  isLogin ? 'text-white' : 'text-slate-700 dark:text-text-secondary hover:text-text-primary'
                 }`}
               >
                 Sign In
@@ -289,7 +281,7 @@ const AuthPage = () => {
                   setFormData({ name: '', email: '', password: '' });
                 }}
                 className={`relative flex-1 py-2.5 text-xs font-bold transition-colors z-10 rounded-xl ${
-                  !isLogin ? 'text-white' : 'text-text-muted hover:text-text-primary'
+                  !isLogin ? 'text-white' : 'text-slate-700 dark:text-text-secondary hover:text-text-primary'
                 }`}
               >
                 Create Account
@@ -404,7 +396,7 @@ const AuthPage = () => {
               type="button"
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="w-full py-3 px-4 rounded-xl bg-bg-tertiary hover:bg-bg-elevated border border-border hover:border-border-hover text-text-primary text-sm font-semibold flex items-center justify-center gap-3 transition-all duration-200 active:scale-[0.98] shadow-sm disabled:opacity-50"
+              className="w-full py-3 px-4 rounded-xl bg-white dark:bg-bg-tertiary hover:bg-slate-50 dark:hover:bg-bg-elevated border border-border hover:border-slate-300 dark:hover:border-border-hover text-text-primary text-sm font-semibold flex items-center justify-center gap-3 transition-all duration-200 active:scale-[0.98] shadow-sm disabled:opacity-50"
             >
               <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />

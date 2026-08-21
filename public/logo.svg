@@ -1,0 +1,30 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="collab-gradient-primary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366F1" />
+      <stop offset="50%" stop-color="#8B5CF6" />
+      <stop offset="100%" stop-color="#0EA5E9" />
+    </linearGradient>
+    <linearGradient id="collab-gradient-surface" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.03" />
+    </linearGradient>
+  </defs>
+
+  <!-- Squircle Base -->
+  <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#collab-gradient-primary)" />
+  <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#collab-gradient-surface)" />
+  <rect x="2.5" y="2.5" width="43" height="43" rx="12.5" stroke="rgba(255, 255, 255, 0.35)" stroke-width="1" />
+
+  <!-- Folded Note Document -->
+  <path d="M14 15C14 13.3431 15.3431 12 17 12H27L34 19V33C34 34.6569 32.6569 36 31 36H17C15.3431 36 14 34.6569 14 33V15Z" fill="white" fill-opacity="0.95" />
+  <path d="M27 12V17C27 18.1046 27.8954 19 29 19H34L27 12Z" fill="#DDD6FE" />
+
+  <!-- Document Line Bars -->
+  <rect x="18" y="22" width="12" height="2" rx="1" fill="#6366F1" fill-opacity="0.8" />
+  <rect x="18" y="27" width="8" height="2" rx="1" fill="#8B5CF6" fillOpacity="0.8" />
+
+  <!-- Live Collab Pulse Node -->
+  <circle cx="34" cy="34" r="5.5" fill="#0EA5E9" stroke="white" stroke-width="2" />
+  <circle cx="34" cy="34" r="2" fill="white" />
+</svg>
