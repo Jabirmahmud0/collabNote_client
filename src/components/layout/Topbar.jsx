@@ -9,7 +9,7 @@ const Topbar = ({ searchQuery, onSearchChange, onCreateNote }) => {
   const { user } = useAuth();
 
   return (
-    <header className="h-14 bg-bg-primary/60 backdrop-blur-xl border-b border-border flex items-center justify-between px-6 z-20 sticky top-0">
+    <header className="h-14 bg-bg-primary/80 backdrop-blur-xl border-b border-border flex items-center justify-between px-6 z-20 sticky top-0">
       {/* Search */}
       <div className="flex-1 max-w-md">
         <div className="relative group">
@@ -19,7 +19,7 @@ const Topbar = ({ searchQuery, onSearchChange, onCreateNote }) => {
             placeholder="Search notes..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-bg-secondary/60 border border-border rounded-lg text-sm text-text-primary placeholder:text-text-muted/40 focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/10 transition-all hover:border-border-hover"
+            className="w-full pl-10 pr-4 py-2 bg-bg-card border border-border rounded-lg text-sm text-text-primary placeholder:text-text-muted/60 focus:outline-none focus:border-accent/60 focus:ring-2 focus:ring-accent/10 transition-all hover:border-border-hover shadow-sm"
           />
           <kbd className="hidden md:inline absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-medium text-text-muted bg-bg-tertiary px-1.5 py-0.5 rounded border border-border">⌘K</kbd>
         </div>

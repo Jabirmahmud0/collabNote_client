@@ -159,7 +159,7 @@ const NoteCard = ({ note, onClick, onEdit, onShare, onDelete, onRestore, isTrash
           </div>
 
           {/* Excerpt */}
-          <p className="text-sm text-text-muted leading-relaxed line-clamp-3 mb-4 min-h-[3.25rem]">
+          <p className="text-[13px] text-text-secondary leading-relaxed line-clamp-3 mb-4 min-h-[3.25rem]">
             {excerpt}
           </p>
 
@@ -179,7 +179,7 @@ const NoteCard = ({ note, onClick, onEdit, onShare, onDelete, onRestore, isTrash
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 bg-bg-tertiary/50 border-t border-border flex items-center justify-between">
+        <div className="px-5 py-3 bg-bg-tertiary/30 dark:bg-bg-tertiary/50 border-t border-border flex items-center justify-between">
           {/* Collaborators */}
           {collaborators.length > 0 ? (
             <div className="flex items-center gap-2">
@@ -191,7 +191,7 @@ const NoteCard = ({ note, onClick, onEdit, onShare, onDelete, onRestore, isTrash
                     src={collab.user.avatar}
                     name={collab.user.name}
                     size="xs"
-                    className="w-5 h-5 text-[8px] border border-bg-secondary"
+                    className="w-5 h-5 text-[8px] border border-bg-card"
                   />
                 ))}
                 {collaborators.length > 3 && (
@@ -200,12 +200,12 @@ const NoteCard = ({ note, onClick, onEdit, onShare, onDelete, onRestore, isTrash
                   </div>
                 )}
               </div>
-              <span className="text-[10px] text-text-muted">
+              <span className="text-[10px] text-text-muted font-medium">
                 {collaborators.length} {collaborators.length === 1 ? 'collaborator' : 'collaborators'}
               </span>
             </div>
           ) : (
-            <span className="text-[10px] text-text-muted">Private note</span>
+            <span className="text-[10px] text-text-muted font-medium">Private note</span>
           )}
         </div>
       </motion.div>

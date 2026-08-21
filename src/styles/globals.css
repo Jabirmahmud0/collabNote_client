@@ -91,27 +91,35 @@
 [data-theme="light"] {
   --bg-primary:     #f8f9fd;
   --bg-secondary:   #ffffff;
-  --bg-tertiary:    #f1f2f8;
+  --bg-tertiary:    #f1f3f9;
   --bg-elevated:    #ffffff;
-  --bg-card:        rgba(255, 255, 255, 0.9);
-  --bg-sidebar:     #f4f5fb;
+  --bg-card:        #ffffff;
+  --bg-sidebar:     #ffffff;
   --bg-input:       #ffffff;
   --bg-glass-strong: rgba(255, 255, 255, 0.95);
 
-  --text-primary:   #0f111a;
-  --text-secondary: #484b63;
-  --text-muted:     #7c8099;
+  --text-primary:   #0f172a;
+  --text-secondary: #334155;
+  --text-muted:     #64748b;
 
-  --border:         rgba(0, 0, 0, 0.08);
-  --border-hover:   rgba(0, 0, 0, 0.16);
-  --border-active:  rgba(124, 92, 252, 0.45);
+  --accent:         #6366f1;
+  --accent-hover:   #4f46e5;
+  --accent-rgb:     99, 102, 241;
+  --accent-light:   rgba(99, 102, 241, 0.08);
+  --accent-glow:    rgba(99, 102, 241, 0.25);
+  --accent-secondary: #0ea5e9;
+  --accent-secondary-rgb: 14, 165, 233;
 
-  --shadow-sm:      0 2px 8px rgba(0,0,0,0.04);
-  --shadow-md:      0 8px 24px rgba(0,0,0,0.06);
-  --shadow-lg:      0 16px 48px rgba(0,0,0,0.08);
-  --shadow-xl:      0 24px 64px rgba(0,0,0,0.10);
-  --shadow-accent:  0 8px 32px rgba(124, 92, 252, 0.18);
-  --shadow-glow:    0 0 80px rgba(124, 92, 252, 0.10);
+  --border:         #e2e8f0;
+  --border-hover:   #cbd5e1;
+  --border-active:  rgba(99, 102, 241, 0.45);
+
+  --shadow-sm:      0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-md:      0 4px 10px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+  --shadow-lg:      0 12px 24px -4px rgba(0, 0, 0, 0.06), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+  --shadow-xl:      0 20px 32px -6px rgba(0, 0, 0, 0.08), 0 8px 12px -4px rgba(0, 0, 0, 0.04);
+  --shadow-accent:  0 8px 24px rgba(99, 102, 241, 0.18);
+  --shadow-glow:    0 0 40px rgba(99, 102, 241, 0.08);
 }
 
 /* ─── Reset ─── */
@@ -191,21 +199,22 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ─── Cards ─── */
 .cn-card {
-  background: var(--bg-secondary);
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
-  transition: all 0.4s var(--ease-out-expo);
+  transition: all 0.3s var(--ease-out-expo);
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
 .cn-card::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.05) 0%, transparent 50%);
+  background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.04) 0%, transparent 50%);
   opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.3s ease;
   pointer-events: none;
 }
 

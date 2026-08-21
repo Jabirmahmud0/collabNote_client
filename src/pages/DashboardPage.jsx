@@ -173,16 +173,16 @@ const DashboardPage = () => {
             <div className="flex items-end justify-between mb-8">
               <div>
                 <div className="flex items-center gap-3 mb-1">
-                  <h2 className="text-3xl font-bold tracking-tight text-text-primary">
+                  <h2 className="text-3xl font-extrabold tracking-tight text-text-primary">
                     {filterLabels[filter] || filter}
                   </h2>
                   {!loading && (
-                    <span className="px-2.5 py-1 bg-white/5 border border-white/5 rounded-full text-xs font-medium text-text-muted">
+                    <span className="px-2.5 py-1 bg-accent/10 border border-accent/20 rounded-full text-xs font-semibold text-accent">
                       {filteredNotes.length} {filteredNotes.length === 1 ? 'note' : 'notes'}
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-text-muted mt-1">
+                <p className="text-sm text-text-secondary mt-1">
                   {selectedTag ? `Filtered by tag: ${selectedTag}` : 'Manage and organize your notes'}
                 </p>
               </div>
