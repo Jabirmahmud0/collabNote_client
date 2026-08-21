@@ -137,14 +137,14 @@ const AuthPage = () => {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.4 }}
         onClick={() => navigate('/')}
-        className="absolute top-6 left-6 z-30 flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-text-muted hover:text-text-primary bg-bg-secondary/60 hover:bg-white/10 border border-white/5 backdrop-blur-md transition-all shadow-sm group"
+        className="absolute top-6 left-6 z-30 flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-text-muted hover:text-text-primary bg-bg-secondary/80 hover:bg-bg-elevated border border-border backdrop-blur-md transition-all shadow-sm group"
       >
         <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
         <span>Back to Home</span>
       </motion.button>
 
       {/* ═══ Left Showcase Hero Panel (Desktop) ═══ */}
-      <div className="hidden lg:flex flex-1 relative flex-col justify-between p-12 xl:p-16 border-r border-white/5 bg-gradient-to-b from-white/[0.02] via-transparent to-black/30 overflow-hidden">
+      <div className="hidden lg:flex flex-1 relative flex-col justify-between p-12 xl:p-16 border-r border-border bg-gradient-to-b from-accent/5 via-transparent to-accent/[0.02] overflow-hidden">
         {/* Brand Header */}
         <div className="relative z-10 pt-4">
           <div className="inline-flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
@@ -152,7 +152,7 @@ const AuthPage = () => {
               <span className="text-white font-black text-sm tracking-wider">CN</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-extrabold tracking-tight text-white leading-none">CollabNote</span>
+              <span className="text-xl font-extrabold tracking-tight text-text-primary leading-none">CollabNote</span>
               <span className="text-[11px] font-medium text-accent tracking-wide mt-1">Workspace Intelligence</span>
             </div>
           </div>
@@ -174,7 +174,7 @@ const AuthPage = () => {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
-            className="text-4xl xl:text-5xl font-black tracking-[-0.035em] leading-[1.12] mb-5 text-white"
+            className="text-4xl xl:text-5xl font-black tracking-[-0.035em] leading-[1.12] mb-5 text-text-primary"
           >
             Where ideas turn into <span className="text-gradient-hero">collective knowledge</span>
           </motion.h1>
@@ -183,7 +183,7 @@ const AuthPage = () => {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.3 }}
-            className="text-base text-text-secondary leading-relaxed font-light mb-8 max-w-lg"
+            className="text-base text-text-secondary leading-relaxed font-normal mb-8 max-w-lg"
           >
             Collaborative markdown editing with sub-50ms sync, integrated Gemini AI assistance, visual diff history, and instant team handoff.
           </motion.p>
@@ -195,31 +195,31 @@ const AuthPage = () => {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="grid grid-cols-2 gap-3.5"
           >
-            <div className="p-4 rounded-2xl bg-bg-secondary/60 border border-white/5 backdrop-blur-xl hover:border-accent/30 transition-colors group">
+            <div className="p-4 rounded-2xl bg-bg-card border border-border backdrop-blur-xl hover:border-accent/40 shadow-sm transition-all group">
               <div className="w-8 h-8 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-3 text-accent group-hover:scale-105 transition-transform">
                 <Zap className="w-4 h-4" />
               </div>
-              <h4 className="text-xs font-bold text-white mb-1">Sub-50ms Realtime Sync</h4>
-              <p className="text-[11px] text-text-muted leading-normal font-light">Instant multi-cursor presence & live conflict-free edits.</p>
+              <h4 className="text-xs font-bold text-text-primary mb-1">Sub-50ms Realtime Sync</h4>
+              <p className="text-[11px] text-text-muted leading-normal font-normal">Instant multi-cursor presence & live conflict-free edits.</p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-bg-secondary/60 border border-white/5 backdrop-blur-xl hover:border-emerald-500/30 transition-colors group">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-3 text-emerald-400 group-hover:scale-105 transition-transform">
+            <div className="p-4 rounded-2xl bg-bg-card border border-border backdrop-blur-xl hover:border-emerald-500/40 shadow-sm transition-all group">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-3 text-emerald-500 group-hover:scale-105 transition-transform">
                 <Bot className="w-4 h-4" />
               </div>
-              <h4 className="text-xs font-bold text-white mb-1">Gemini AI Copilot</h4>
-              <p className="text-[11px] text-text-muted leading-normal font-light">Auto-summaries, action items, and smart note tagging.</p>
+              <h4 className="text-xs font-bold text-text-primary mb-1">Gemini AI Copilot</h4>
+              <p className="text-[11px] text-text-muted leading-normal font-normal">Auto-summaries, action items, and smart note tagging.</p>
             </div>
           </motion.div>
         </div>
 
         {/* Bottom Social Proof */}
-        <div className="relative z-10 flex items-center justify-between pt-6 border-t border-white/5 text-xs text-text-muted">
+        <div className="relative z-10 flex items-center justify-between pt-6 border-t border-border text-xs text-text-muted">
           <div className="flex items-center gap-2.5">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>End-to-end encrypted session auth</span>
+            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+            <span className="font-medium text-text-secondary">End-to-end encrypted session auth</span>
           </div>
-          <span className="font-mono text-[11px] text-text-muted/70">v1.0 Production</span>
+          <span className="font-mono text-[11px] text-text-muted">v1.0 Production</span>
         </div>
       </div>
 
@@ -236,26 +236,26 @@ const AuthPage = () => {
             <div className="w-12 h-12 bg-gradient-to-br from-accent to-accent-secondary rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-accent/30 mb-3">
               <span className="text-white font-extrabold text-sm">CN</span>
             </div>
-            <h2 className="text-xl font-bold text-white tracking-tight">CollabNote</h2>
+            <h2 className="text-xl font-bold text-text-primary tracking-tight">CollabNote</h2>
           </div>
 
           {/* Form Header */}
           <div className="mb-7 text-center sm:text-left">
-            <h2 className="text-2xl sm:text-3xl font-black tracking-[-0.03em] text-white mb-2">
+            <h2 className="text-2xl sm:text-3xl font-black tracking-[-0.03em] text-text-primary mb-2">
               {isLogin ? 'Welcome back' : 'Create an account'}
             </h2>
-            <p className="text-sm text-text-secondary font-light">
+            <p className="text-sm text-text-secondary font-normal">
               {isLogin ? 'Sign in to access your notes and collaborative workspace' : 'Get started in seconds — completely free'}
             </p>
           </div>
 
           {/* Main Auth Card */}
-          <div className="bg-bg-secondary/80 backdrop-blur-2xl border border-white/[0.08] rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden ring-1 ring-white/5">
+          <div className="bg-bg-card backdrop-blur-2xl border border-border rounded-3xl p-6 sm:p-8 shadow-xl shadow-black/5 dark:shadow-2xl relative overflow-hidden ring-1 ring-black/5 dark:ring-white/5">
             {/* Top Specular Gradient Line */}
             <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-accent to-transparent opacity-70" />
 
             {/* Mode Switcher Tabs */}
-            <div className="flex relative mb-6 bg-bg-tertiary/70 rounded-2xl p-1 border border-white/5">
+            <div className="flex relative mb-6 bg-bg-tertiary rounded-2xl p-1 border border-border">
               <motion.div
                 layout
                 className="absolute inset-y-1 w-[calc(50%-4px)] bg-accent rounded-xl shadow-md shadow-accent/25"
@@ -304,7 +304,7 @@ const AuthPage = () => {
                 exit={{ opacity: 0, height: 0 }}
                 className="mb-5 p-3 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-between gap-3 text-xs"
               >
-                <div className="flex items-center gap-2 text-accent font-medium">
+                <div className="flex items-center gap-2 text-accent font-semibold">
                   <Sparkles className="w-3.5 h-3.5 shrink-0" />
                   <span>Demo account ready</span>
                 </div>
@@ -369,7 +369,7 @@ const AuthPage = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-[34px] p-1.5 text-text-muted hover:text-text-primary transition-colors rounded-lg hover:bg-white/5"
+                  className="absolute right-3 top-[34px] p-1.5 text-text-muted hover:text-text-primary transition-colors rounded-lg hover:bg-border/50"
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -390,10 +390,10 @@ const AuthPage = () => {
             {/* Or Divider */}
             <div className="relative my-5">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-white/5" />
+                <div className="w-full border-t border-border" />
               </div>
               <div className="relative flex justify-center">
-                <span className="px-3 bg-bg-secondary text-[11px] uppercase tracking-wider text-text-muted font-bold">
+                <span className="px-3 bg-bg-card text-[11px] uppercase tracking-wider text-text-muted font-bold">
                   or
                 </span>
               </div>
@@ -404,7 +404,7 @@ const AuthPage = () => {
               type="button"
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="w-full py-3 px-4 rounded-xl bg-bg-tertiary/80 hover:bg-bg-elevated border border-white/10 hover:border-white/20 text-text-primary text-sm font-semibold flex items-center justify-center gap-3 transition-all duration-200 active:scale-[0.98] shadow-sm disabled:opacity-50"
+              className="w-full py-3 px-4 rounded-xl bg-bg-tertiary hover:bg-bg-elevated border border-border hover:border-border-hover text-text-primary text-sm font-semibold flex items-center justify-center gap-3 transition-all duration-200 active:scale-[0.98] shadow-sm disabled:opacity-50"
             >
               <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />

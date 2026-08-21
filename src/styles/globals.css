@@ -89,29 +89,29 @@
 
 /* ─── Light Theme ─── */
 [data-theme="light"] {
-  --bg-primary:     #f8f8fc;
-  --bg-secondary:   #ededf4;
-  --bg-tertiary:    #e0e0ea;
+  --bg-primary:     #f8f9fd;
+  --bg-secondary:   #ffffff;
+  --bg-tertiary:    #f1f2f8;
   --bg-elevated:    #ffffff;
-  --bg-card:        rgba(255, 255, 255, 0.8);
-  --bg-sidebar:     #f0f0f7;
+  --bg-card:        rgba(255, 255, 255, 0.9);
+  --bg-sidebar:     #f4f5fb;
   --bg-input:       #ffffff;
-  --bg-glass-strong: rgba(248, 248, 252, 0.85);
+  --bg-glass-strong: rgba(255, 255, 255, 0.95);
 
-  --text-primary:   #111118;
-  --text-secondary: #4a4a62;
-  --text-muted:     #8080a0;
+  --text-primary:   #0f111a;
+  --text-secondary: #484b63;
+  --text-muted:     #7c8099;
 
   --border:         rgba(0, 0, 0, 0.08);
   --border-hover:   rgba(0, 0, 0, 0.16);
-  --border-active:  rgba(124, 92, 252, 0.35);
+  --border-active:  rgba(124, 92, 252, 0.45);
 
-  --shadow-sm:      0 2px 8px rgba(0,0,0,0.05);
-  --shadow-md:      0 8px 24px rgba(0,0,0,0.08);
-  --shadow-lg:      0 16px 48px rgba(0,0,0,0.10);
-  --shadow-xl:      0 24px 64px rgba(0,0,0,0.12);
-  --shadow-accent:  0 8px 32px rgba(124, 92, 252, 0.15);
-  --shadow-glow:    0 0 80px rgba(124, 92, 252, 0.08);
+  --shadow-sm:      0 2px 8px rgba(0,0,0,0.04);
+  --shadow-md:      0 8px 24px rgba(0,0,0,0.06);
+  --shadow-lg:      0 16px 48px rgba(0,0,0,0.08);
+  --shadow-xl:      0 24px 64px rgba(0,0,0,0.10);
+  --shadow-accent:  0 8px 32px rgba(124, 92, 252, 0.18);
+  --shadow-glow:    0 0 80px rgba(124, 92, 252, 0.10);
 }
 
 /* ─── Reset ─── */
@@ -340,9 +340,18 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 [data-theme="light"] .text-gradient {
-  background: linear-gradient(135deg, #5b3ed9, #7c5cfc, #9b7afe, #00b893);
+  background: linear-gradient(135deg, #4f2ed4, #6f47f2, #9067fa, #009677);
   background-size: 300% 300%;
   animation: gradient-shift 6s ease infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="light"] .text-gradient-hero {
+  background: linear-gradient(135deg, #0f111a 0%, #5733d8 35%, #7c5cfc 65%, #00a383 100%);
+  background-size: 300% 300%;
+  animation: text-shine 8s linear infinite;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

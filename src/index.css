@@ -7,6 +7,10 @@
   overflow: hidden;
 }
 
+[data-theme="light"] .premium-card {
+  @apply bg-white/85 border-black/8 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.06)];
+}
+
 .premium-card::before {
   content: '';
   position: absolute;
@@ -15,10 +19,18 @@
   pointer-events: none;
 }
 
+[data-theme="light"] .premium-card::before {
+  background: linear-gradient(135deg, rgba(124,92,252,0.04) 0%, transparent 100%);
+}
+
 .premium-card-hover {
   @apply transition-all duration-500 ease-[0.16,1,0.3,1];
 }
 
 .premium-card-hover:hover {
   @apply -translate-y-2 border-white/15 bg-white/5 shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)];
+}
+
+[data-theme="light"] .premium-card-hover:hover {
+  @apply -translate-y-2 border-black/15 bg-white/95 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.12)];
 }
